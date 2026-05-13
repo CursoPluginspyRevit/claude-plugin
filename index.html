@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIM Coder Claude Kit. 16 skills pra criar plugins pyRevit com IA</title>
+<meta name="description" content="Toolkit Claude Code que transforma uma ideia em plugin pyRevit funcional. 16 skills, 6 references técnicas, 30 armadilhas catalogadas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+
+<style>
+:root {
+    --bg-base: #0C111D;
+    --bg-elevated: #161B26;
+    --bg-card: #1A1F2E;
+    --bg-card-hover: #1F2937;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-medium: rgba(255, 255, 255, 0.10);
+    --border-accent: rgba(158, 119, 237, 0.40);
+
+    --text-primary: #F5F5F6;
+    --text-secondary: #94A3B8;
+    --text-tertiary: #667085;
+    --text-muted: #475467;
+
+    --accent-50: #F4EBFF;
+    --accent-200: #E9D7FE;
+    --accent-400: #B692F6;
+    --accent-500: #9E77ED;
+    --accent-600: #7F56D9;
+    --accent-700: #6941C6;
+
+    --success: #12B76A;
+    --warning: #F79009;
+    --error: #F04438;
+
+    --shadow-glow: 0 0 0 1px rgba(158, 119, 237, 0.30), 0 8px 32px -8px rgba(158, 119, 237, 0.25);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.40);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 16px;
+    overflow-x: hidden;
+}
+
+/* Background gradient */
+body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(127, 86, 217, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 80% 60%, rgba(127, 86, 217, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ============ NAV ============ */
+nav {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(12, 17, 29, 0.80);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--accent-500), var(--accent-700));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(158, 119, 237, 0.35);
+}
+
+.logo-icon .material-symbols-outlined {
+    color: white;
+    font-size: 20px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-card);
+}
+
+/* ============ HERO ============ */
+.hero {
+    padding: 96px 0 64px;
+    text-align: center;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 8px;
+    background: rgba(158, 119, 237, 0.10);
+    border: 1px solid rgba(158, 119, 237, 0.30);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-200);
+    margin-bottom: 24px;
+}
+
+.hero-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-400);
+    box-shadow: 0 0 8px var(--accent-400);
+}
+
+.hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    background: linear-gradient(180deg, #F5F5F6 0%, #94A3B8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero h1 .accent {
+    background: linear-gradient(180deg, var(--accent-400) 0%, var(--accent-600) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+    font-size: 19px;
+    color: var(--text-secondary);
+    max-width: 680px;
+    margin: 0 auto 40px;
+    line-height: 1.55;
+}
+
+.hero-cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: var(--accent-600);
+    color: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.30), 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+
+.btn-primary:hover {
+    background: var(--accent-500);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px -4px rgba(158, 119, 237, 0.40);
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-medium);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-accent);
+}
+
+.btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ============ STATS BAR ============ */
+.stats {
+    padding: 24px 0 80px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: 32px;
+}
+
+.stat {
+    text-align: center;
+    padding: 12px;
+}
+
+.stat-value {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    background: linear-gradient(180deg, #F5F5F6 0%, #B692F6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ============ COMO FUNCIONA ============ */
+.section {
+    padding: 80px 0;
+}
+
+.section-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 56px;
+}
+
+.section-eyebrow {
+    color: var(--accent-400);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.section-sub {
+    color: var(--text-secondary);
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+.flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    position: relative;
+}
+
+.flow-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px 20px;
+    position: relative;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.flow-step:hover {
+    border-color: var(--border-accent);
+    transform: translateY(-2px);
+}
+
+.flow-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-600);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0 auto 16px;
+    box-shadow: 0 0 16px rgba(158, 119, 237, 0.35);
+}
+
+.flow-step h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.flow-step p {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    line-height: 1.45;
+}
+
+/* ============ SKILLS GRID ============ */
+.skill-group {
+    margin-bottom: 48px;
+}
+
+.group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.group-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: rgba(158, 119, 237, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-400);
+}
+
+.group-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.group-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.group-count {
+    margin-left: auto;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 10px;
+    background: var(--bg-card);
+    border-radius: 999px;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.skill-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+}
+
+.skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-500), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.skill-card:hover {
+    border-color: var(--border-accent);
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.skill-card:hover::before {
+    opacity: 1;
+}
+
+.skill-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(158, 119, 237, 0.20), rgba(127, 86, 217, 0.10));
+    border: 1px solid rgba(158, 119, 237, 0.20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-400);
+    margin-bottom: 16px;
+    transition: all 0.25s;
+}
+
+.skill-card:hover .skill-icon {
+    background: linear-gradient(135deg, var(--accent-500), var(--accent-700));
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 0 20px rgba(158, 119, 237, 0.40);
+}
+
+.skill-icon .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.skill-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-400);
+    margin-bottom: 8px;
+}
+
+.skill-desc {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+/* ============ INSTALL ============ */
+.install-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: 40px;
+}
+
+.install-steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.install-step {
+    margin-bottom: 24px;
+}
+
+.install-step:last-child { margin-bottom: 0; }
+
+.install-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(158, 119, 237, 0.15);
+    color: var(--accent-400);
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.install-step h4 {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.install-step p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-left: 32px;
+}
+
+.code-block {
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: var(--text-secondary);
+}
+
+.code-block .comment { color: var(--text-muted); }
+.code-block .cmd { color: var(--accent-400); }
+.code-block .str { color: #95D5B2; }
+.code-block .path { color: #B692F6; }
+
+/* ============ FOOTER ============ */
+footer {
+    padding: 64px 0 40px;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: 80px;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.footer-credit {
+    color: var(--text-tertiary);
+    font-size: 14px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 24px;
+}
+
+.footer-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.footer-link:hover {
+    color: var(--accent-400);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 900px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 24px;
+    }
+    .flow {
+        grid-template-columns: 1fr 1fr;
+    }
+    .install-steps {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .section {
+        padding: 56px 0;
+    }
+    .hero {
+        padding: 64px 0 40px;
+    }
+}
+
+@media (max-width: 540px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .flow {
+        grid-template-columns: 1fr;
+    }
+    .stat-value {
+        font-size: 32px;
+    }
+    .nav-links .nav-link:not(:last-child) {
+        display: none;
+    }
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav>
+    <div class="container nav-inner">
+        <div class="logo">
+            <div class="logo-icon">
+                <span class="material-symbols-outlined">deployed_code</span>
+            </div>
+            BIM Coder Claude Kit
+        </div>
+        <div class="nav-links">
+            <a href="#skills" class="nav-link">Skills</a>
+            <a href="#instalar" class="nav-link">Instalar</a>
+            <a href="https://github.com/CursoPluginspyRevit/claude-plugin" class="btn btn-secondary" style="padding: 8px 14px; font-size: 13px;">
+                <span class="material-symbols-outlined" style="font-size: 16px;">code</span>
+                GitHub
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<header class="hero">
+    <div class="container">
+        <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            Plugin Claude Code · v0.1
+        </div>
+        <h1>16 skills pra criar<br>plugins pyRevit <span class="accent">com IA</span></h1>
+        <p class="hero-sub">
+            Toolkit que transforma uma ideia em script funcional. Você descreve, a IA pergunta o que precisa, gera o código respeitando as 9 regras técnicas e empacota tudo na estrutura correta da extension.
+        </p>
+        <div class="hero-cta">
+            <a href="#skills" class="btn btn-primary">
+                <span class="material-symbols-outlined">grid_view</span>
+                Ver as skills
+            </a>
+            <a href="#instalar" class="btn btn-secondary">
+                <span class="material-symbols-outlined">download</span>
+                Como instalar
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- ========== STATS ========== -->
+<section class="stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-value">16</div>
+                <div class="stat-label">Skills</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">9</div>
+                <div class="stat-label">Regras técnicas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">30</div>
+                <div class="stat-label">Armadilhas catalogadas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">7.4K</div>
+                <div class="stat-label">Linhas de plugin</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== COMO FUNCIONA ========== -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-eyebrow">Como funciona</div>
+            <h2 class="section-title">Da ideia ao plugin instalado</h2>
+            <p class="section-sub">Fluxo end-to-end. Você não precisa decorar nomes de classe, lembrar de encoding ou caçar BuiltInParameter. A IA faz isso.</p>
+        </div>
+
+        <div class="flow">
+            <div class="flow-step">
+                <div class="flow-num">1</div>
+                <h4>Planejar</h4>
+                <p>Entrevista em 5 camadas. Escopo, gatilho, lógica, UI, edge cases.</p>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">2</div>
+                <h4>Criar bundle</h4>
+                <p>Pasta, script, ícone dual 96×96, layout.yaml. Tudo no padrão pyRevit.</p>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">3</div>
+                <h4>Escrever código</h4>
+                <p>9 regras absolutas aplicadas. APIs validadas contra dicionário.</p>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">4</div>
+                <h4>Auditar</h4>
+                <p>Varredura das 30 armadilhas conhecidas. Sem surpresa em produção.</p>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">5</div>
+                <h4>Distribuir</h4>
+                <p>Instalador .exe pronto ou migração pra C# nativo.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SKILLS ========== -->
+<section class="section" id="skills">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-eyebrow">As 16 Skills</div>
+            <h2 class="section-title">Cada skill resolve uma etapa</h2>
+            <p class="section-sub">Use uma de cada vez, ou encadeie. As skills delegam entre si quando faz sentido.</p>
+        </div>
+
+        <!-- Grupo 1. Concepção -->
+        <div class="skill-group">
+            <div class="group-header">
+                <div class="group-icon"><span class="material-symbols-outlined">route</span></div>
+                <div class="group-title">Concepção</div>
+                <div class="group-count">1 skill</div>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">schema</span></div>
+                    <div class="skill-name">/planejar-plugin</div>
+                    <div class="skill-desc">Entrevista em 5 camadas. Transforma ideia em plano técnico executável (plano.md) antes de gerar código.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 2. Estrutura -->
+        <div class="skill-group">
+            <div class="group-header">
+                <div class="group-icon"><span class="material-symbols-outlined">folder_open</span></div>
+                <div class="group-title">Estrutura da extension</div>
+                <div class="group-count">4 skills</div>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">deployed_code</span></div>
+                    <div class="skill-name">/criar-extension</div>
+                    <div class="skill-desc">Cria a raiz da extension. Pasta .extension, extension.json, _layout.yaml.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">tab</span></div>
+                    <div class="skill-name">/criar-tab</div>
+                    <div class="skill-desc">Adiciona uma aba nova no ribbon do Revit. Com título e ordem preservada.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">dashboard</span></div>
+                    <div class="skill-name">/criar-panel</div>
+                    <div class="skill-desc">Agrupa botões relacionados num panel dentro da tab.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">arrow_drop_down_circle</span></div>
+                    <div class="skill-name">/criar-pulldown</div>
+                    <div class="skill-desc">Botão com dropdown de sub-itens. Útil quando o panel ficou cheio.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 3. Botões e código -->
+        <div class="skill-group">
+            <div class="group-header">
+                <div class="group-icon"><span class="material-symbols-outlined">smart_button</span></div>
+                <div class="group-title">Botões e código</div>
+                <div class="group-count">4 skills</div>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">radio_button_checked</span></div>
+                    <div class="skill-name">/criar-pushbutton</div>
+                    <div class="skill-desc">Bundle completo: pasta, script.py, ícone dual via Iconify, layout.yaml atualizado.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">stacks</span></div>
+                    <div class="skill-name">/criar-stack</div>
+                    <div class="skill-desc">Empilha 2 ou 3 pushbuttons verticalmente. Aproveita espaço do panel.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">edit_note</span></div>
+                    <div class="skill-name">/criar-script</div>
+                    <div class="skill-desc">Preenche o script.py aberto a partir de descrição em linguagem natural. Entrega direta sem preview pra tarefa simples.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">dock_to_right</span></div>
+                    <div class="skill-name">/criar-dockable-pane</div>
+                    <div class="skill-desc">Painel ancorado nativo (estilo Properties). startup.py, XAML, Provider, singleton. 6 armadilhas evitadas.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 4. UI customizada -->
+        <div class="skill-group">
+            <div class="group-header">
+                <div class="group-icon"><span class="material-symbols-outlined">dynamic_form</span></div>
+                <div class="group-title">Interface customizada</div>
+                <div class="group-count">1 skill</div>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">web_asset</span></div>
+                    <div class="skill-name">/criar-form-wpf</div>
+                    <div class="skill-desc">Formulário WPF customizado quando pyrevit.forms não basta. XAML + handler integrado ao script.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 5. Distribuição e migração -->
+        <div class="skill-group">
+            <div class="group-header">
+                <div class="group-icon"><span class="material-symbols-outlined">install_desktop</span></div>
+                <div class="group-title">Distribuição e migração</div>
+                <div class="group-count">2 skills</div>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">download_for_offline</span></div>
+                    <div class="skill-name">/criar-instalador-inno</div>
+                    <div class="skill-desc">Gera .iss do Inno Setup. Vira instalador .exe profissional pra entregar pros clientes.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">swap_horiz</span></div>
+                    <div class="skill-name">/migrar-csharp</div>
+                    <div class="skill-desc">Porta pushbutton Python pra Add-in C# nativo. Multi-targeting net48/net8, ribbon, hooks.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 6. Utilitárias -->
+        <div class="skill-group">
+            <div class="group-header">
+                <div class="group-icon"><span class="material-symbols-outlined">build</span></div>
+                <div class="group-title">Utilitárias</div>
+                <div class="group-count">4 skills</div>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">palette</span></div>
+                    <div class="skill-name">/buscar-icone</div>
+                    <div class="skill-desc">Sugere ícones do Iconify a partir de termo em português. 200 mil ícones de 150 bibliotecas.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">menu_book</span></div>
+                    <div class="skill-name">/consultar-api</div>
+                    <div class="skill-desc">Busca rápida no dicionário da Revit API. "Como crio cota?" → retorna trecho com exemplo.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">rule</span></div>
+                    <div class="skill-name">/auditar-extension</div>
+                    <div class="skill-desc">Varre a extension procurando as 30 armadilhas catalogadas. Gera relatório por severidade.</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><span class="material-symbols-outlined">bug_report</span></div>
+                    <div class="skill-name">/debugar-pyrevit</div>
+                    <div class="skill-desc">Diagnóstico de erros comuns. "No module named _wpf", lentidão, botão não aparece, mapeia pra fix.</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ========== INSTALL ========== -->
+<section class="section" id="instalar">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-eyebrow">Como usar</div>
+            <h2 class="section-title">Instalação em 2 passos</h2>
+            <p class="section-sub">Clona o repo, abre o Claude Code apontando pra ele. Pronto.</p>
+        </div>
+
+        <div class="install-card">
+            <div class="install-steps">
+                <div>
+                    <div class="install-step">
+                        <span class="install-step-num">1</span>
+                        <h4>Clonar o repositório</h4>
+                        <p>Em qualquer pasta do seu PC. Sugestão: <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">C:\bimcoder-claude-kit</code></p>
+                    </div>
+                    <div class="install-step">
+                        <span class="install-step-num">2</span>
+                        <h4>Abrir o Claude Code com a flag</h4>
+                        <p>Aponta o <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">--plugin-dir</code> pra pasta do plugin. Funciona em qualquer pasta.</p>
+                    </div>
+                    <div class="install-step">
+                        <span class="install-step-num">3</span>
+                        <h4>Usar as skills</h4>
+                        <p>Digite <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">/planejar-plugin</code>, <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">/criar-script</code> ou descreva em linguagem natural.</p>
+                    </div>
+                </div>
+
+                <div class="code-block">
+<span class="comment"># clonar o plugin uma vez</span>
+<span class="cmd">git</span> clone <span class="str">https://github.com/CursoPluginspyRevit/claude-plugin</span> <span class="path">C:\bimcoder-claude-kit</span>
+
+<span class="comment"># dentro da pasta da extension pyRevit:</span>
+<span class="cmd">cd</span> <span class="path">"MinhaExtensao.extension"</span>
+<span class="cmd">claude</span> --plugin-dir <span class="path">"C:\bimcoder-claude-kit\bimcoder-claude-kit"</span>
+
+<span class="comment"># agora dentro do Claude Code:</span>
+/planejar-plugin <span class="str">"cota paredes da view"</span>
+/criar-pushbutton
+/criar-script
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-credit">
+                BIM Coder Claude Kit · construído pra automatizar pyRevit com IA
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/CursoPluginspyRevit/claude-plugin" class="footer-link">GitHub</a>
+                <a href="https://www.youtube.com/@bimcoder" class="footer-link">YouTube</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
