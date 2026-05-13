@@ -20,7 +20,13 @@ Bibliotecas curadas (priorizadas na busca):
     lucide, material-symbols, tabler, mdi, phosphor, ph
 
 Requisitos:
-    Python 3.6+ com urllib (built-in). Sem dependencias extras.
+    - Python 3.6+ (urllib e json sao built-in)
+    - resvg-py (pip install resvg-py)
+
+Por que resvg-py: o endpoint .png do Iconify e instavel e pode retornar
+404 (armadilha 31). O fluxo robusto e baixar SVG (sempre estavel) e
+converter localmente via resvg, um renderizador SVG escrito em Rust
+embedado via PyO3. Funciona out-of-the-box no Windows, sem libcairo.
 
 Saida no stdout:
     JSON com {success, icon_name, files: [icon.png, icon.dark.png]}
@@ -32,6 +38,12 @@ import sys
 import json
 import urllib.request
 import urllib.parse
+
+try:
+    from resvg_py import svg_to_bytes
+    HAS_RESVG = True
+except ImportError:
+    HAS_RESVG = False
 
 
 # Bibliotecas Iconify priorizadas (estilo coerente e mais conhecidas)
@@ -235,24 +247,50 @@ def search_iconify(query):
 
 
 def download_png(icon_fullname, output_path, color_hex):
-    """Baixa PNG 96x96 do Iconify com cor especifica.
+    """Baixa SVG do Iconify e converte para PNG 96x96 RGBA via resvg-py.
 
     icon_fullname: ex 'lucide:ruler'
     output_path: caminho completo do arquivo destino
-    color_hex: ex '#344054' ou '%23344054' (url-encoded)
+    color_hex: ex '#344054' (com ou sem '#')
+
+    Estrategia: o endpoint .png do Iconify e instavel e pode retornar
+    404 mesmo para icones validos (armadilha 31). Por isso baixamos o
+    SVG (sempre estavel) e convertemos localmente via resvg-py, que
+    funciona out-of-the-box no Windows sem libcairo.
     """
+    if not HAS_RESVG:
+        sys.stderr.write(
+            "ERRO: resvg-py nao instalado. Rode: pip install resvg-py\n"
+        )
+        return False
+
     color = color_hex.lstrip("#")
-    url = f"https://api.iconify.design/{icon_fullname}.png?height=96&color=%23{color}"
+    url = f"https://api.iconify.design/{icon_fullname}.svg?color=%23{color}"
 
     try:
-        png_bytes = fetch_url(url)
-        # Validacao basica: PNGs comecam com magic bytes
-        if not png_bytes.startswith(b"\x89PNG"):
+        svg_bytes = fetch_url(url)
+        # Validacao basica: SVGs comecam com '<' (ou BOM '<')
+        if not (svg_bytes.startswith(b"<") or svg_bytes.startswith(b"\xef\xbb\xbf<")):
+            sys.stderr.write(f"SVG invalido para {icon_fullname}\n")
             return False
+
+        # Converter SVG -> PNG 96x96 RGBA via resvg
+        png_data = svg_to_bytes(bytestring=svg_bytes, width=96, height=96)
+
+        # Algumas versoes de resvg-py retornam list[int] em vez de bytes
+        if isinstance(png_data, list):
+            png_data = bytes(png_data)
+
+        # Validacao: PNG comeca com magic bytes
+        if not png_data.startswith(b"\x89PNG"):
+            sys.stderr.write(f"PNG gerado invalido para {icon_fullname}\n")
+            return False
+
         with open(output_path, "wb") as f:
-            f.write(png_bytes)
+            f.write(png_data)
         return True
-    except Exception:
+    except Exception as exc:
+        sys.stderr.write(f"Erro processando {icon_fullname}: {exc}\n")
         return False
 
 

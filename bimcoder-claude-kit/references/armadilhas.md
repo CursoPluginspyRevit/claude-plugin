@@ -772,3 +772,40 @@ if (themeType != null)
 // Revit 2024 e anteriores: fallback por Registry
 // HKCU\Software\Autodesk\Revit\Autodesk Revit YYYY\Scheme\ColorTheme == "1" → Dark
 ```
+
+---
+
+## 31. Endpoint PNG do Iconify pode retornar 404
+
+**Sintoma:** Skill que baixa ícone via `https://api.iconify.design/{prefix}/{name}.png?height=96&color=...` recebe HTTP 404 mesmo pra ícone válido. Build do bundle falha sem `icon.png` e `icon.dark.png`.
+
+**Causa:** O endpoint de PNG renderizado server-side do Iconify é instável e às vezes retorna 404, mesmo pra ícones que existem no catálogo. O endpoint SVG (`.svg`) é confiável e sempre responde.
+
+**Fix:** Baixar o SVG e converter localmente pra PNG via `resvg-py`. É renderizador SVG escrito em Rust embedado via PyO3. Funciona out-of-the-box no Windows sem libcairo nem outras dependências nativas.
+
+```python
+import urllib.request
+from resvg_py import svg_to_bytes
+
+color = "344054"  # hex sem '#'
+url = f"https://api.iconify.design/lucide/ruler.svg?color=%23{color}"
+
+svg_bytes = urllib.request.urlopen(url).read()
+png_data = svg_to_bytes(bytestring=svg_bytes, width=96, height=96)
+
+# Algumas versoes retornam list[int] em vez de bytes
+if isinstance(png_data, list):
+    png_data = bytes(png_data)
+
+with open("icon.png", "wb") as f:
+    f.write(png_data)
+```
+
+**Pré-requisito:** `pip install resvg-py`
+
+Por que não outras libs:
+- `cairosvg` requer libcairo nativa, instalação chata no Windows
+- `svglib + Pillow` é frágil em SVGs com filters/gradients complexos
+- `wand/imagemagick` requer instalação separada do ImageMagick
+
+O `helpers/icon-fetcher.py` do kit já aplica esse fluxo desde a v0.2. Skills que usam ícone (`/criar-pushbutton`, `/criar-pulldown`, `/criar-dockable-pane`, `/buscar-icone`) chamam o helper e não precisam reimplementar a conversão.
