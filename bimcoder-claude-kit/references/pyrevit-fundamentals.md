@@ -109,6 +109,72 @@ Itens obrigatórios em todo `script.py`:
 
 ---
 
+## Helpers do pyRevit. Quando usar em vez da Revit API direta
+
+**Regra geral:** API original do Revit (`Autodesk.Revit.DB`, `Autodesk.Revit.UI`) é o padrão. Wrappers do `pyrevit.revit.*` só em duas exceções: formulários e seleção do usuário.
+
+### Exceção 1. Formulários e UI (`pyrevit.forms`)
+
+Veja a seção "Formulários com `pyrevit.forms`" mais abaixo. Use `forms.alert`, `forms.SelectFromList`, `forms.ask_for_one_item`, `forms.pick_file` etc. em vez de criar WPF próprio.
+
+### Exceção 2. Seleção do usuário (`revit.pick_elements*`)
+
+Em vez de chamar `uidoc.Selection.PickObjects(...)` cru da Revit API, use os wrappers do pyRevit. Eles encapsulam:
+- Tratamento de `OperationCanceledException` (usuário aperta ESC)
+- Criação correta de `ISelectionFilter` interno (evitando a armadilha de variável local coletada pelo GC do IronPython)
+- Retorno em lista de `Element` já pronta (não precisa converter `Reference` → `Element` manualmente)
+
+```python
+from pyrevit import revit
+from Autodesk.Revit.DB import BuiltInCategory
+
+# Pegar elementos sem filtro (qualquer categoria)
+elementos = revit.pick_elements(message="Selecione os elementos")
+
+if elementos:
+    for e in elementos:
+        print(e.Id.IntegerValue, e.Category.Name)
+```
+
+```python
+# Pegar elementos filtrando por uma categoria
+paredes = revit.pick_elements_by_category(
+    BuiltInCategory.OST_Walls,
+    message="Selecione as paredes"
+)
+```
+
+```python
+# Pegar UM elemento (singular)
+elemento = revit.pick_element(message="Selecione um elemento")
+```
+
+Retorno:
+- Se o usuário **cancelar** (ESC), retorna `None` ou lista vazia (varia por versão do pyRevit). Trate sempre com `if not selecao:`.
+- Se selecionar com sucesso, retorna lista de `Element` (no `pick_elements*`) ou um `Element` único (no `pick_element`).
+
+### O que continua sendo Revit API direta
+
+Tudo o que NÃO é form ou seleção de usuário no modelo:
+
+- `FilteredElementCollector` (coleta programática)
+- `Transaction` (modificação no modelo)
+- Geometria (`XYZ`, `Line`, `CurveLoop`, `Transform`, `Options`)
+- Parâmetros (`element.LookupParameter`, `BuiltInParameter`)
+- Materiais, Views, Sheets, Levels, Links
+- `UnitUtils.ConvertFromInternalUnits` / `ConvertToInternalUnits`
+- `TaskDialog.Show` (dialogo simples)
+- `ElementTransformUtils.MoveElement` / `RotateElement` / `CopyElements`
+
+### Por que esse padrão
+
+- **Portabilidade:** código que usa Revit API direta migra pra C# sem refatoração. Wrappers do pyRevit não existem em C#.
+- **Documentação:** docs oficiais da Autodesk, StackOverflow, GitHub, livros, todos usam a API direta. Aluno que se acostuma com wrappers fica preso no ecossistema pyRevit.
+- **Manutenção:** wrappers do pyRevit podem mudar entre versões. A API direta é estável.
+- **Exceções justificadas:** `forms` e `pick_elements*` resolvem problemas reais (boilerplate de WPF, GC do IronPython coletando filtro). Outros wrappers não dão ganho equivalente.
+
+---
+
 ## IronPython 2.7. Limitações e Atenções
 
 O pyRevit roda em IronPython 2.7. Isso impõe restrições importantes:

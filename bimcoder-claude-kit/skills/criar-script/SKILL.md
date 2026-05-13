@@ -116,7 +116,7 @@ Leia o conteúdo atual de `script.py`:
 
 ### Passo 6. Gerar o código
 
-Aplique as 9 Regras Técnicas Absolutas do `CLAUDE.md`. Use a estrutura padrão:
+Aplique as 9 Regras Técnicas Absolutas do `CLAUDE.md` e o **Estilo de API** (seção "Revit API direta vs wrappers pyRevit"). Use a estrutura padrão:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -127,10 +127,10 @@ __author__ = "BIM Coder"
 __doc__ = "Descrição completa que aparece no tooltip e no help do pyRevit."
 
 # Imports condicionais. Só o que é realmente usado.
-from pyrevit import revit, forms
+from pyrevit import revit, forms     # forms: pyrevit. revit: doc/uidoc/pick
 from Autodesk.Revit.DB import (
     FilteredElementCollector, BuiltInCategory, Transaction,
-    # ... só os realmente usados abaixo
+    # ... outras classes da Revit API direta
 )
 
 doc = revit.doc
@@ -144,6 +144,55 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+**Regra de import: priorize a API direta do Revit.** Wrappers do `pyrevit.revit.*` só nas duas exceções abaixo. Tudo mais é `Autodesk.Revit.DB` / `Autodesk.Revit.UI`.
+
+| Operação | O que importar |
+|---|---|
+| Coletor de elementos | `from Autodesk.Revit.DB import FilteredElementCollector` |
+| Transação | `from Autodesk.Revit.DB import Transaction` |
+| Categorias e parâmetros | `from Autodesk.Revit.DB import BuiltInCategory, BuiltInParameter` |
+| Geometria (XYZ, Line, etc) | `from Autodesk.Revit.DB import XYZ, Line, Transform, ...` |
+| Unidades | `from Autodesk.Revit.DB import UnitUtils, UnitTypeId` |
+| **Formulários (alert, select)** | `from pyrevit import forms` ← exceção 1 |
+| **Output formatado** | `from pyrevit import output` ← exceção 1 |
+| **Selecionar elementos** | `revit.pick_elements(message="...")` ← exceção 2 |
+| **Selecionar por categoria** | `revit.pick_elements_by_category(BuiltInCategory.X, message="...")` ← exceção 2 |
+| **Acesso a doc/uidoc/app** | `from pyrevit import revit; doc = revit.doc` (padrão estabelecido) |
+
+Exemplo certo de fluxo com seleção:
+
+```python
+from pyrevit import revit, forms
+from Autodesk.Revit.DB import (
+    BuiltInCategory, Transaction, ElementId,
+)
+
+doc = revit.doc
+
+# selecao via wrapper pyRevit (excecao 2)
+paredes = revit.pick_elements_by_category(
+    BuiltInCategory.OST_Walls,
+    message="Selecione as paredes a cotar"
+)
+
+if not paredes:
+    forms.alert("Nenhuma parede selecionada.")
+    return
+
+# operacao no modelo usa API direta
+t = Transaction(doc, "Cotar paredes")
+t.Start()
+try:
+    for parede in paredes:
+        # ... codigo usando API direta
+        pass
+    t.Commit()
+except Exception as e:
+    if t.HasStarted():
+        t.RollBack()
+    forms.alert("Erro: {}".format(str(e)))
 ```
 
 Regras de qualidade (todas vindas do `CLAUDE.md`):

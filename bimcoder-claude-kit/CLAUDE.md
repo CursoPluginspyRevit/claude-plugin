@@ -47,6 +47,73 @@ não, são, você, está, já, três, público, lógico, estratégia, dúvida, m
 
 ---
 
+## Estilo de API. Revit API direta vs wrappers pyRevit
+
+**Regra padrão:** chamadas à API do Revit usam SEMPRE o namespace original `Autodesk.Revit.DB` e `Autodesk.Revit.UI`. Não use os wrappers do `pyrevit.revit.*` para operações de modelo, geometria, parâmetros, etc. Isso prepara o aluno pra ler código de StackOverflow, GitHub, docs oficiais e migrar pra C# sem refatoração.
+
+```python
+# CORRETO. API original do Revit
+from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Transaction, Wall
+
+walls = FilteredElementCollector(doc).OfClass(Wall).ToElements()
+t = Transaction(doc, "Operação")
+```
+
+```python
+# ERRADO. Wrapper do pyRevit que esconde a API
+from pyrevit import revit
+walls = revit.query.get_all_elements_in_view(...)  # não usar
+t = revit.Transaction("Operação")  # não usar (e quebra a regra 1)
+```
+
+### Exceções. Quando usar wrappers do pyRevit
+
+São DUAS exceções, sempre. Fora disso, API direta:
+
+**1. Formulários e UI auxiliar.** Use `pyrevit.forms` (alert, SelectFromList, ask_for_string, ask_for_one_item, pick_file, etc.) e `pyrevit.output` (relatórios formatados). São mais rápidos de escrever que WPF customizado e cobrem 90% dos casos.
+
+```python
+from pyrevit import forms, output
+
+selecao = forms.SelectFromList.show(opcoes, multiselect=True)
+forms.alert("Operação concluída.")
+op = output.get_output()
+op.print_table(rows, columns=["A", "B"])
+```
+
+**2. Seleção do usuário no modelo.** Use os wrappers de pick do pyRevit em vez de `uidoc.Selection.PickObjects` cru:
+
+```python
+from pyrevit import revit
+from Autodesk.Revit.DB import BuiltInCategory
+
+# pegar elementos sem filtro
+elementos = revit.pick_elements(message="Selecione os elementos")
+
+# pegar elementos filtrando por categoria
+paredes = revit.pick_elements_by_category(
+    BuiltInCategory.OST_Walls,
+    message="Selecione as paredes"
+)
+```
+
+Esses wrappers já encapsulam o tratamento de `OperationCanceledException` e a criação de `ISelectionFilter` (evitando a armadilha 6 da variável local coletada pelo GC).
+
+### Contexto fixo
+
+A leitura de `doc`, `uidoc` e `app` continua via pyRevit (é o padrão estabelecido):
+
+```python
+from pyrevit import revit
+doc = revit.doc
+uidoc = revit.uidoc
+app = revit.app
+```
+
+Esse import é a única coisa de `pyrevit.revit` que entra em scripts além de `pick_elements*`. Tudo mais é API direta.
+
+---
+
 ## Regras Técnicas Absolutas
 
 Estas nove regras valem para 100% do código gerado. Cada uma representa uma armadilha conhecida da Revit API ou do IronPython. Nunca quebre, mesmo que o aluno peça. Detalhes completos com exemplos longos em `references/armadilhas.md`.
