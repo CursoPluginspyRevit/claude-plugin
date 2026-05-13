@@ -199,7 +199,9 @@ def init(uiapp):
 > 1. Sim, em qual panel?
 > 2. Não, vou criar manualmente"
 
-Se sim, chamar `/criar-pushbutton` com script já preenchido:
+Se sim, **acione `/criar-pushbutton`** apontando para o panel escolhido. A `/criar-pushbutton` por sua vez delega o conteúdo do `script.py` para `/criar-script`, que aplica as 9 regras técnicas + validação de API (regra 9: nome de tipo via `BuiltInParameter.ALL_MODEL_TYPE_NAME`, nunca `.Name`).
+
+**NUNCA gere o script.py do trigger manualmente nesta skill.** Sempre delegue. O snippet abaixo é só referência conceitual do conteúdo final esperado, NÃO um template pra copiar direto:
 
 ```python
 # -*- coding: utf-8 -*-

@@ -100,11 +100,18 @@ Template:
 
 Convenção: prefixar nomes WPF com `UIe_` para distinguir de variáveis Python.
 
-### Passo 4. Gerar o handler Python
+### Passo 4. Gerar o handler Python (via `/criar-script`)
 
 Decidir: handler INTEGRADO ao `script.py` (mais comum) ou separado em `form.py`. Padrão: integrado.
 
-Adicione ao `script.py` existente (ou crie boilerplate se não existir):
+**NÃO escreva o handler Python diretamente nesta skill.** Em vez disso, **acione `/criar-script`** passando:
+- Caminho do `script.py` alvo
+- Descrição: "form WPF com {N} controles ({lista de campos}), com handler integrado que: {lógica que o aluno descreveu}"
+- Referência ao `form.xaml` que acabou de ser criado (Passo 3)
+
+A `/criar-script` aplica a auto-revisão dupla (9 regras técnicas + validação de API), garantindo que armadilhas como a #10 (`.Name` em vez de `BuiltInParameter.ALL_MODEL_TYPE_NAME`) NÃO escapem.
+
+O snippet abaixo é o **conteúdo conceitual esperado** que a `/criar-script` vai produzir, NÃO um template pra copiar direto desta skill:
 
 ```python
 # -*- coding: utf-8 -*-
