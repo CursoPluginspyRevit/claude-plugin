@@ -912,43 +912,233 @@ footer {
 <section class="section" id="instalar">
     <div class="container">
         <div class="section-header">
-            <div class="section-eyebrow">Como usar</div>
-            <h2 class="section-title">Instalação em 2 passos</h2>
-            <p class="section-sub">Clona o repo, abre o Claude Code apontando pra ele. Pronto.</p>
+            <div class="section-eyebrow">Como instalar</div>
+            <h2 class="section-title">Instalação em 1 clique</h2>
+            <p class="section-sub">A aula entrega o instalador pronto. Sem terminal, sem comandos, sem configuração.</p>
         </div>
+
+        <style>
+        .claude-mock {
+            background: #0A0E15;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.50);
+        }
+        .claude-mock-header {
+            background: #050810;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .claude-mock-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .claude-mock-dots span {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+        .claude-mock-dots span:nth-child(1) { background: #EF4444; }
+        .claude-mock-dots span:nth-child(2) { background: #F59E0B; }
+        .claude-mock-dots span:nth-child(3) { background: #10B981; }
+        .claude-mock-title {
+            color: var(--text-tertiary);
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+        .claude-mock-body {
+            padding: 16px;
+        }
+        .claude-mock-prompt {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        .claude-mock-cursor {
+            color: var(--accent-400);
+            font-weight: 600;
+        }
+        .claude-mock-cursor-blink {
+            display: inline-block;
+            width: 2px;
+            height: 14px;
+            background: var(--text-primary);
+            margin-left: 1px;
+            animation: mock-blink 1.1s infinite;
+            vertical-align: middle;
+        }
+        @keyframes mock-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .claude-mock-menu {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            padding: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-height: 280px;
+            overflow: hidden;
+        }
+        .claude-mock-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+        .claude-mock-item.active {
+            background: rgba(158, 119, 237, 0.12);
+            border: 1px solid rgba(158, 119, 237, 0.25);
+            margin: -1px;
+        }
+        .claude-mock-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(158, 119, 237, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .claude-mock-item.active .claude-mock-icon {
+            background: linear-gradient(135deg, var(--accent-500), var(--accent-700));
+        }
+        .claude-mock-icon .material-symbols-outlined {
+            font-size: 16px;
+            color: var(--accent-400);
+        }
+        .claude-mock-item.active .claude-mock-icon .material-symbols-outlined {
+            color: white;
+        }
+        .claude-mock-text { flex: 1; min-width: 0; }
+        .claude-mock-name {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 12.5px;
+            line-height: 1.3;
+        }
+        .claude-mock-item.active .claude-mock-name {
+            color: var(--accent-200);
+        }
+        .claude-mock-desc {
+            color: var(--text-tertiary);
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            margin-top: 1px;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .claude-mock-hint {
+            margin-top: 12px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+        .claude-mock-hint kbd {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-base);
+            border: 1px solid var(--border-medium);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 10.5px;
+            color: var(--text-secondary);
+        }
+        </style>
 
         <div class="install-card">
             <div class="install-steps">
                 <div>
                     <div class="install-step">
                         <span class="install-step-num">1</span>
-                        <h4>Clonar o repositório</h4>
-                        <p>Em qualquer pasta do seu PC. Sugestão: <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">C:\bimcoder-claude-kit</code></p>
+                        <h4>Acesse a aula Claude Code Skills</h4>
+                        <p>No curso, baixe o arquivo <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">.bat</code> de instalação que está anexado.</p>
                     </div>
                     <div class="install-step">
                         <span class="install-step-num">2</span>
-                        <h4>Abrir o Claude Code com a flag</h4>
-                        <p>Aponta o <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">--plugin-dir</code> pra pasta do plugin. Funciona em qualquer pasta.</p>
+                        <h4>Execute o .bat no seu computador</h4>
+                        <p>Dois cliques. O script faz todo o setup automaticamente (clone do plugin + configuração).</p>
                     </div>
                     <div class="install-step">
                         <span class="install-step-num">3</span>
-                        <h4>Usar as skills</h4>
-                        <p>Digite <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">/planejar-plugin</code>, <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">/criar-script</code> ou descreva em linguagem natural.</p>
+                        <h4>Reinicie o Claude e digite '/'</h4>
+                        <p>No VS Code, reinicie a sessão do Claude Code e digite <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg-base); padding: 1px 6px; border-radius: 4px;">/</code> pra ver todas as skills disponíveis.</p>
                     </div>
                 </div>
 
-                <div class="code-block">
-<span class="comment"># clonar o plugin uma vez</span>
-<span class="cmd">git</span> clone <span class="str">https://github.com/CursoPluginspyRevit/claude-plugin</span> <span class="path">C:\bimcoder-claude-kit</span>
-
-<span class="comment"># dentro da pasta da extension pyRevit:</span>
-<span class="cmd">cd</span> <span class="path">"MinhaExtensao.extension"</span>
-<span class="cmd">claude</span> --plugin-dir <span class="path">"C:\bimcoder-claude-kit\bimcoder-claude-kit"</span>
-
-<span class="comment"># agora dentro do Claude Code:</span>
-/planejar-plugin <span class="str">"cota paredes da view"</span>
-/criar-pushbutton
-/criar-script
+                <!-- Mockup visual do menu de skills aparecendo no Claude Code -->
+                <div class="claude-mock">
+                    <div class="claude-mock-header">
+                        <div class="claude-mock-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="claude-mock-title">Claude Code · VS Code</div>
+                    </div>
+                    <div class="claude-mock-body">
+                        <div class="claude-mock-prompt">
+                            <span class="claude-mock-cursor">/</span><span class="claude-mock-cursor-blink"></span>
+                        </div>
+                        <div class="claude-mock-menu">
+                            <div class="claude-mock-item active">
+                                <div class="claude-mock-icon"><span class="material-symbols-outlined">schema</span></div>
+                                <div class="claude-mock-text">
+                                    <div class="claude-mock-name">/planejar-plugin</div>
+                                    <div class="claude-mock-desc">Entrevista em 5 camadas, gera plano.md</div>
+                                </div>
+                            </div>
+                            <div class="claude-mock-item">
+                                <div class="claude-mock-icon"><span class="material-symbols-outlined">edit_note</span></div>
+                                <div class="claude-mock-text">
+                                    <div class="claude-mock-name">/criar-script</div>
+                                    <div class="claude-mock-desc">Preenche script.py aberto</div>
+                                </div>
+                            </div>
+                            <div class="claude-mock-item">
+                                <div class="claude-mock-icon"><span class="material-symbols-outlined">radio_button_checked</span></div>
+                                <div class="claude-mock-text">
+                                    <div class="claude-mock-name">/criar-pushbutton</div>
+                                    <div class="claude-mock-desc">Bundle completo com ícone dual</div>
+                                </div>
+                            </div>
+                            <div class="claude-mock-item">
+                                <div class="claude-mock-icon"><span class="material-symbols-outlined">menu_book</span></div>
+                                <div class="claude-mock-text">
+                                    <div class="claude-mock-name">/consultar-api</div>
+                                    <div class="claude-mock-desc">Busca no dicionário da Revit API</div>
+                                </div>
+                            </div>
+                            <div class="claude-mock-item">
+                                <div class="claude-mock-icon"><span class="material-symbols-outlined">rule</span></div>
+                                <div class="claude-mock-text">
+                                    <div class="claude-mock-name">/auditar-extension</div>
+                                    <div class="claude-mock-desc">Varre as 30 armadilhas catalogadas</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="claude-mock-hint">
+                            <kbd>↑↓</kbd> navegar &nbsp;·&nbsp; <kbd>↵</kbd> selecionar &nbsp;·&nbsp; +11 skills disponíveis
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
