@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seção das Skills (standalone)</title>
+
+<!--
+========================================================================
+SEÇÃO DAS 16 SKILLS DO BIM CODER CLAUDE KIT — pronta pra colar em
+qualquer página de vendas.
+
+Como usar:
+1. Copie o bloco <style>...</style> abaixo pra dentro do <head> da
+   sua página de vendas (ou pra um arquivo .css importado)
+2. Copie a <section class="bcsk-section">...</section> pra onde
+   quiser na sua página
+3. Importe as fontes Inter, JetBrains Mono e Material Symbols no
+   <head> da sua página (links na seção abaixo)
+
+Classes prefixadas com bcsk- (BIM Coder Skills Kit) pra não colidir
+com o CSS da página de vendas existente. Todas as variáveis CSS
+estão scoped no .bcsk-section, não vazam pro :root.
+========================================================================
+-->
+
+<!-- 1. Fontes externas (adicione ao <head> da sua página de vendas) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+
+<!-- 2. CSS da seção (copie pra dentro do <head> da sua página) -->
+<style>
+.bcsk-section {
+    /* Tokens (scoped, não conflitam com sua página) */
+    --bcsk-bg-base: #0C111D;
+    --bcsk-bg-card: #1A1F2E;
+    --bcsk-bg-card-hover: #1F2937;
+    --bcsk-border-subtle: rgba(255, 255, 255, 0.06);
+    --bcsk-border-accent: rgba(158, 119, 237, 0.40);
+    --bcsk-text-primary: #F5F5F6;
+    --bcsk-text-secondary: #94A3B8;
+    --bcsk-text-tertiary: #667085;
+    --bcsk-accent-200: #E9D7FE;
+    --bcsk-accent-400: #B692F6;
+    --bcsk-accent-500: #9E77ED;
+    --bcsk-accent-600: #7F56D9;
+    --bcsk-accent-700: #6941C6;
+    --bcsk-radius-sm: 6px;
+    --bcsk-radius-md: 10px;
+    --bcsk-radius-lg: 14px;
+    --bcsk-shadow-glow: 0 0 0 1px rgba(158, 119, 237, 0.30), 0 8px 32px -8px rgba(158, 119, 237, 0.25);
+
+    /* Layout da seção */
+    background: var(--bcsk-bg-base);
+    color: var(--bcsk-text-primary);
+    font-family: 'Inter', -apple-system, sans-serif;
+    line-height: 1.6;
+    padding: 96px 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.bcsk-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(127, 86, 217, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 80% 60%, rgba(127, 86, 217, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+}
+
+.bcsk-section *,
+.bcsk-section *::before,
+.bcsk-section *::after {
+    box-sizing: border-box;
+}
+
+.bcsk-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Header da seção */
+.bcsk-section-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 56px;
+}
+.bcsk-section-eyebrow {
+    color: var(--bcsk-accent-400);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    margin-bottom: 12px;
+}
+.bcsk-section-title {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    color: var(--bcsk-text-primary);
+}
+.bcsk-section-sub {
+    color: var(--bcsk-text-secondary);
+    font-size: 17px;
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* Grupos */
+.bcsk-skill-group {
+    margin-bottom: 48px;
+}
+.bcsk-skill-group:last-child { margin-bottom: 0; }
+
+.bcsk-group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--bcsk-border-subtle);
+}
+.bcsk-group-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--bcsk-radius-sm);
+    background: rgba(158, 119, 237, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bcsk-accent-400);
+}
+.bcsk-group-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+.bcsk-group-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bcsk-text-primary);
+}
+.bcsk-group-count {
+    margin-left: auto;
+    color: var(--bcsk-text-tertiary);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 10px;
+    background: var(--bcsk-bg-card);
+    border-radius: 999px;
+}
+
+/* Grid */
+.bcsk-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+/* Card */
+.bcsk-skill-card {
+    background: var(--bcsk-bg-card);
+    border: 1px solid var(--bcsk-border-subtle);
+    border-radius: var(--bcsk-radius-lg);
+    padding: 24px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+.bcsk-skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--bcsk-accent-500), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+.bcsk-skill-card:hover {
+    border-color: var(--bcsk-border-accent);
+    background: var(--bcsk-bg-card-hover);
+    transform: translateY(-3px);
+    box-shadow: var(--bcsk-shadow-glow);
+}
+.bcsk-skill-card:hover::before {
+    opacity: 1;
+}
+
+.bcsk-skill-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--bcsk-radius-md);
+    background: linear-gradient(135deg, rgba(158, 119, 237, 0.20), rgba(127, 86, 217, 0.10));
+    border: 1px solid rgba(158, 119, 237, 0.20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bcsk-accent-400);
+    margin-bottom: 16px;
+    transition: all 0.25s;
+}
+.bcsk-skill-card:hover .bcsk-skill-icon {
+    background: linear-gradient(135deg, var(--bcsk-accent-500), var(--bcsk-accent-700));
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 0 20px rgba(158, 119, 237, 0.40);
+}
+.bcsk-skill-icon .material-symbols-outlined {
+    font-size: 24px;
+}
+.bcsk-skill-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bcsk-accent-400);
+    margin-bottom: 8px;
+}
+.bcsk-skill-desc {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--bcsk-text-secondary);
+}
+
+@media (max-width: 600px) {
+    .bcsk-section { padding: 64px 20px; }
+    .bcsk-skills-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body style="margin: 0;">
+
+<!-- 3. Seção pra colar na página de vendas -->
+<section class="bcsk-section">
+    <div class="bcsk-container">
+        <div class="bcsk-section-header">
+            <div class="bcsk-section-eyebrow">As 16 Skills</div>
+            <h2 class="bcsk-section-title">Cada skill resolve uma etapa</h2>
+            <p class="bcsk-section-sub">Você descreve em linguagem natural. A IA pergunta o que precisa, gera o código respeitando as 9 regras técnicas e empacota tudo na estrutura correta da extension.</p>
+        </div>
+
+        <!-- Grupo 1. Concepção -->
+        <div class="bcsk-skill-group">
+            <div class="bcsk-group-header">
+                <div class="bcsk-group-icon"><span class="material-symbols-outlined">route</span></div>
+                <div class="bcsk-group-title">Concepção</div>
+                <div class="bcsk-group-count">1 skill</div>
+            </div>
+            <div class="bcsk-skills-grid">
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">schema</span></div>
+                    <div class="bcsk-skill-name">/planejar-plugin</div>
+                    <div class="bcsk-skill-desc">Entrevista em 5 camadas. Transforma ideia em plano técnico executável (plano.md) antes de gerar código.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 2. Estrutura -->
+        <div class="bcsk-skill-group">
+            <div class="bcsk-group-header">
+                <div class="bcsk-group-icon"><span class="material-symbols-outlined">folder_open</span></div>
+                <div class="bcsk-group-title">Estrutura da extension</div>
+                <div class="bcsk-group-count">4 skills</div>
+            </div>
+            <div class="bcsk-skills-grid">
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">deployed_code</span></div>
+                    <div class="bcsk-skill-name">/criar-extension</div>
+                    <div class="bcsk-skill-desc">Cria a raiz da extension. Pasta .extension, extension.json, _layout.yaml.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">tab</span></div>
+                    <div class="bcsk-skill-name">/criar-tab</div>
+                    <div class="bcsk-skill-desc">Adiciona uma aba nova no ribbon do Revit. Com título e ordem preservada.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">dashboard</span></div>
+                    <div class="bcsk-skill-name">/criar-panel</div>
+                    <div class="bcsk-skill-desc">Agrupa botões relacionados num panel dentro da tab.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">arrow_drop_down_circle</span></div>
+                    <div class="bcsk-skill-name">/criar-pulldown</div>
+                    <div class="bcsk-skill-desc">Botão com dropdown de sub-itens. Útil quando o panel ficou cheio.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 3. Botões e código -->
+        <div class="bcsk-skill-group">
+            <div class="bcsk-group-header">
+                <div class="bcsk-group-icon"><span class="material-symbols-outlined">smart_button</span></div>
+                <div class="bcsk-group-title">Botões e código</div>
+                <div class="bcsk-group-count">4 skills</div>
+            </div>
+            <div class="bcsk-skills-grid">
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">radio_button_checked</span></div>
+                    <div class="bcsk-skill-name">/criar-pushbutton</div>
+                    <div class="bcsk-skill-desc">Bundle completo: pasta, script.py, ícone dual via Iconify, layout.yaml atualizado.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">stacks</span></div>
+                    <div class="bcsk-skill-name">/criar-stack</div>
+                    <div class="bcsk-skill-desc">Empilha 2 ou 3 pushbuttons verticalmente. Aproveita espaço do panel.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">edit_note</span></div>
+                    <div class="bcsk-skill-name">/criar-script</div>
+                    <div class="bcsk-skill-desc">Preenche o script.py aberto a partir de descrição em linguagem natural. Entrega direta sem preview pra tarefa simples.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">dock_to_right</span></div>
+                    <div class="bcsk-skill-name">/criar-dockable-pane</div>
+                    <div class="bcsk-skill-desc">Painel ancorado nativo (estilo Properties). startup.py, XAML, Provider, singleton. 6 armadilhas evitadas.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 4. UI customizada -->
+        <div class="bcsk-skill-group">
+            <div class="bcsk-group-header">
+                <div class="bcsk-group-icon"><span class="material-symbols-outlined">dynamic_form</span></div>
+                <div class="bcsk-group-title">Interface customizada</div>
+                <div class="bcsk-group-count">1 skill</div>
+            </div>
+            <div class="bcsk-skills-grid">
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">web_asset</span></div>
+                    <div class="bcsk-skill-name">/criar-form-wpf</div>
+                    <div class="bcsk-skill-desc">Formulário WPF customizado quando pyrevit.forms não basta. XAML + handler integrado ao script.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 5. Distribuição e migração -->
+        <div class="bcsk-skill-group">
+            <div class="bcsk-group-header">
+                <div class="bcsk-group-icon"><span class="material-symbols-outlined">install_desktop</span></div>
+                <div class="bcsk-group-title">Distribuição e migração</div>
+                <div class="bcsk-group-count">2 skills</div>
+            </div>
+            <div class="bcsk-skills-grid">
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">download_for_offline</span></div>
+                    <div class="bcsk-skill-name">/criar-instalador-inno</div>
+                    <div class="bcsk-skill-desc">Gera .iss do Inno Setup. Vira instalador .exe profissional pra entregar pros clientes.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">swap_horiz</span></div>
+                    <div class="bcsk-skill-name">/migrar-csharp</div>
+                    <div class="bcsk-skill-desc">Porta pushbutton Python pra Add-in C# nativo. Multi-targeting net48/net8, ribbon, hooks.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupo 6. Utilitárias -->
+        <div class="bcsk-skill-group">
+            <div class="bcsk-group-header">
+                <div class="bcsk-group-icon"><span class="material-symbols-outlined">build</span></div>
+                <div class="bcsk-group-title">Utilitárias</div>
+                <div class="bcsk-group-count">4 skills</div>
+            </div>
+            <div class="bcsk-skills-grid">
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">palette</span></div>
+                    <div class="bcsk-skill-name">/buscar-icone</div>
+                    <div class="bcsk-skill-desc">Sugere ícones do Iconify a partir de termo em português. 200 mil ícones de 150 bibliotecas.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">menu_book</span></div>
+                    <div class="bcsk-skill-name">/consultar-api</div>
+                    <div class="bcsk-skill-desc">Busca rápida no dicionário da Revit API. "Como crio cota?" → retorna trecho com exemplo.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">rule</span></div>
+                    <div class="bcsk-skill-name">/auditar-extension</div>
+                    <div class="bcsk-skill-desc">Varre a extension procurando as 30 armadilhas catalogadas. Gera relatório por severidade.</div>
+                </div>
+                <div class="bcsk-skill-card">
+                    <div class="bcsk-skill-icon"><span class="material-symbols-outlined">bug_report</span></div>
+                    <div class="bcsk-skill-name">/debugar-pyrevit</div>
+                    <div class="bcsk-skill-desc">Diagnóstico de erros comuns. "No module named _wpf", lentidão, botão não aparece, mapeia pra fix.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>
