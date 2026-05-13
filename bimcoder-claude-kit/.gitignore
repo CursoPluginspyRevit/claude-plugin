@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node
+node_modules/
+package-lock.json
+npm-debug.log
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Claude Code (configurações locais não vão pro repo)
+.claude/settings.local.json
+.claude/projects/
+
+# Build / Temp
+dist/
+build/
+*.tmp
+*.bak
+*.swp
+*.log
+
+# Pyrevit / Revit (caso o aluno teste extensions dentro do repo)
+*.pyc
+extensions/test-*/

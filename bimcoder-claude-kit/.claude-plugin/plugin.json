@@ -1,0 +1,10 @@
+{
+  "name": "bimcoder-claude-kit",
+  "description": "Toolkit Claude Code para criar plugins pyRevit com IA. Skills de planejamento, criação de extensions, pushbuttons, pulldowns, dockable panes, formulários WPF, migração C# e instalador Inno Setup.",
+  "version": "0.1.0",
+  "author": {
+    "name": "BIM Coder",
+    "url": "https://www.youtube.com/@bimcoder"
+  },
+  "homepage": "https://github.com/bclabss/bimcoder-claude-kit"
+}
