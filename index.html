@@ -1141,6 +1141,518 @@ footer {
     </div>
 </section>
 
+<!-- ========== AGENTS DEMO (pixel office em canvas) ========== -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+.bcsk-agents-section {
+    background: #040c04;
+    padding: 96px 0 80px;
+    position: relative;
+    overflow: hidden;
+}
+.bcsk-agents-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(74, 255, 74, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+}
+.bcsk-agents-section .container { position: relative; z-index: 1; }
+.bcsk-agents-eyebrow {
+    color: #4aff4a;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    margin-bottom: 12px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+}
+.bcsk-agents-title {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    color: #F5F5F6;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+}
+.bcsk-agents-sub {
+    color: #94A3B8;
+    font-size: 17px;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.55;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+}
+.bcsk-agents-canvas-container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 48px auto 0;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(74, 255, 74, 0.20);
+    box-shadow: 0 0 60px rgba(74, 255, 74, 0.10), 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+#bcsk-agents-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: #040c04;
+}
+</style>
+
+<section class="bcsk-agents-section">
+    <div class="container">
+        <div class="bcsk-agents-eyebrow">Veja em ação</div>
+        <h2 class="bcsk-agents-title">16 agentes em 6 zonas, trabalhando em tempo real</h2>
+        <p class="bcsk-agents-sub">Cada agente representa uma skill do kit. Eles vivem em um escritório virtual com salas dedicadas por categoria. Cota o tempo deles enquanto você lê.</p>
+    </div>
+    <div class="bcsk-agents-canvas-container">
+        <canvas id="bcsk-agents-canvas"></canvas>
+    </div>
+</section>
+
+<script>
+(function() {
+'use strict';
+const canvas = document.getElementById('bcsk-agents-canvas');
+if (!canvas) return;
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+const VW = 960, VH = 540;
+let SC = 1, OX = 0, OY = 0;
+const container = canvas.parentElement;
+
+function resize() {
+  const cw = container.clientWidth;
+  const ch = container.clientHeight;
+  if (cw === 0 || ch === 0) return;
+  SC = Math.min(cw / VW, ch / VH);
+  canvas.width = cw;
+  canvas.height = ch;
+  OX = (cw - VW * SC) / 2;
+  OY = (ch - VH * SC) / 2;
+  ctx.imageSmoothingEnabled = false;
+}
+resize();
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(resize).observe(container);
+} else {
+  window.addEventListener('resize', resize);
+}
+
+const vx = x => OX + x * SC;
+const vy = y => OY + y * SC;
+const vs = s => s * SC;
+
+function r(x, y, w, h, c) {
+  if (w <= 0 || h <= 0) return;
+  ctx.fillStyle = c;
+  ctx.fillRect(Math.round(vx(x)), Math.round(vy(y)), Math.max(1, Math.round(vs(w))), Math.max(1, Math.round(vs(h))));
+}
+
+function glow(x, y, rad, col, a1 = 0.22, a2 = 0.08) {
+  const g = ctx.createRadialGradient(vx(x), vy(y), 0, vx(x), vy(y), vs(rad));
+  g.addColorStop(0, col + Math.round(a1 * 255).toString(16).padStart(2, '0'));
+  g.addColorStop(0.5, col + Math.round(a2 * 255).toString(16).padStart(2, '0'));
+  g.addColorStop(1, col + '00');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(vx(x), vy(y), vs(rad), 0, Math.PI * 2);
+  ctx.fill();
+}
+
+let tick = 0;
+
+function drawFloor(x, y, w, h, col, grid) {
+  r(x, y, w, h, col);
+  if (grid) {
+    ctx.strokeStyle = grid;
+    ctx.lineWidth = Math.max(0.5, vs(0.5));
+    for (let gx = x; gx < x + w; gx += 16) { ctx.beginPath(); ctx.moveTo(vx(gx), vy(y)); ctx.lineTo(vx(gx), vy(y + h)); ctx.stroke(); }
+    for (let gy = y; gy < y + h; gy += 16) { ctx.beginPath(); ctx.moveTo(vx(x), vy(gy)); ctx.lineTo(vx(x + w), vy(gy)); ctx.stroke(); }
+  }
+}
+function drawWall(x, y, w, h) { r(x, y, w, h, '#0b150b'); r(x, y, w, 1, '#1e301e'); r(x, y + h - 1, w, 1, '#111a11'); if (w > h) { r(x, y, 1, h, '#1e301e'); r(x + w - 1, y, 1, h, '#111a11'); } }
+function drawPartitionV(x, y, h, col = '#152215') { r(x, y, 3, h, col); r(x, y, 1, h, '#2a402a'); r(x + 2, y, 1, h, '#0d160d'); }
+function drawPartitionH(x, y, w, col = '#152215') { r(x, y, w, 3, col); r(x, y, w, 1, '#2a402a'); r(x, y + 2, w, 1, '#0d160d'); }
+function drawDesk(x, y, w = 28) { r(x + 1, y + 2, w, 17, '#110a04'); r(x, y, w, 14, '#3d2a12'); r(x + 1, y + 14, w - 2, 3, '#2d1e0c'); r(x + 2, y + 16, 3, 5, '#1a0e06'); r(x + w - 5, y + 16, 3, 5, '#1a0e06'); }
+function drawDeskL(x, y) { r(x + 1, y + 2, 40, 17, '#110a04'); r(x, y, 40, 14, '#4d3520'); r(x + 1, y + 14, 38, 3, '#3a280e'); r(x + 2, y + 16, 3, 6, '#1a0e06'); r(x + 20, y + 14, 3, 24, '#2d1e0c'); r(x + 20, y + 14, 22, 14, '#4d3520'); r(x + 20, y + 26, 3, 4, '#1a0e06'); r(x + 39, y + 16, 3, 4, '#1a0e06'); }
+function drawDeskStand(x, y) { r(x, y, 28, 3, '#5a3a18'); r(x, y + 3, 28, 10, '#4a2a10'); r(x + 1, y + 12, 26, 3, '#3a1e0a'); r(x + 3, y + 14, 3, 8, '#1a0e06'); r(x + 22, y + 14, 3, 8, '#1a0e06'); }
+function drawMonitor(x, y, lines, glowCol = '#00ff88', dual = false) {
+  r(x + 10, y + 10, 8, 2, '#1a1a1a'); r(x + 13, y + 4, 2, 7, '#222');
+  r(x + 5, y - 9, 18, 13, '#0f0f0f'); r(x + 6, y - 8, 16, 11, '#001810');
+  glow(x + 14, y - 2, 15, glowCol);
+  for (let i = 0; i < lines.length; i++) r(x + 7, y - 7 + i * 2.5 | 0, lines[i], 1, glowCol + '88');
+  if (dual) {
+    r(x + 30, y + 10, 8, 2, '#1a1a1a'); r(x + 33, y + 4, 2, 7, '#222');
+    r(x + 25, y - 9, 18, 13, '#0f0f0f'); r(x + 26, y - 8, 16, 11, '#001018');
+    glow(x + 34, y - 2, 15, '#4488ff');
+    for (let i = 0; i < 4; i++) r(x + 27, y - 7 + i * 2.5 | 0, 8 + (i % 2) * 4, 1, '#4488ff88');
+  }
+}
+function drawChair(x, y, col = '#1a2535', col2 = '#243550') { r(x + 8, y + 21, 12, 8, col); r(x + 9, y + 18, 10, 5, col2); r(x + 10, y + 28, 2, 5, '#151e2a'); r(x + 16, y + 28, 2, 5, '#151e2a'); }
+function drawChairFancy(x, y) { r(x + 7, y + 20, 14, 9, '#2a1a35'); r(x + 8, y + 17, 12, 6, '#3a2a4a'); r(x + 9, y + 28, 2, 6, '#1a0e2a'); r(x + 17, y + 28, 2, 6, '#1a0e2a'); r(x + 8, y + 29, 10, 1, '#4a2a5a'); }
+function drawPlant(x, y, big = false) { const h = big ? 10 : 6; r(x + 2, y + h + 2, 8, 6, '#5a3520'); r(x + 1, y + h + 5, 10, 3, '#3a2010'); r(x + 5, y + h - 2, 2, 5, '#1a3a0a'); r(x, y, 12, h + 2, '#1a5a18'); r(x + 1, y - 3, 10, 5, '#2a6a22'); r(x + 3, y - 5, 6, 4, '#1a5a18'); r(x + 3, y + 1, 3, 1, '#3a8a2a'); r(x + 7, y, 2, 1, '#3a8a2a'); }
+function drawPlantTall(x, y) { r(x + 3, y + 18, 6, 8, '#5a3520'); r(x + 2, y + 22, 8, 4, '#3a2010'); r(x + 5, y + 4, 2, 16, '#1a4a0a'); r(x + 3, y + 8, 3, 2, '#1a5a10'); r(x + 6, y + 12, 3, 2, '#1a5a10'); r(x, y, 12, 12, '#1a6a18'); r(x + 1, y - 4, 10, 6, '#2a7a22'); r(x + 3, y - 7, 6, 5, '#1a6a18'); }
+function drawCactus(x, y) { r(x + 3, y + 14, 6, 6, '#5a3520'); r(x + 4, y, 4, 18, '#1a6a18'); r(x + 4, y + 5, -4, 3, '#1a6a18'); r(x, y + 2, 4, 7, '#1a6a18'); r(x + 8, y + 7, 4, 3, '#1a6a18'); r(x + 8, y + 4, 4, 7, '#1a6a18'); }
+function drawBookshelf(x, y, w = 22, h = 22) {
+  r(x, y, w, h, '#1e1408');
+  const bk = ['#884444','#4466bb','#44aa44','#aaaa44','#8844aa','#44aaaa','#cc6644','#4488cc'];
+  for (let row = 0; row < 3; row++) {
+    r(x + 1, y + 1 + row * 7, w - 2, 6, '#0e0a04');
+    for (let b = 0; b < Math.floor((w - 2) / 4); b++) r(x + 2 + b * 4, y + 2 + row * 7, 3, 5, bk[(row * 5 + b) % bk.length]);
+  }
+}
+function drawServerRack(x, y) {
+  r(x, y, 16, 34, '#151525'); r(x + 1, y + 1, 14, 32, '#1a1a2a');
+  for (let i = 0; i < 6; i++) {
+    r(x + 1, y + 2 + i * 5, 14, 4, '#111120');
+    r(x + 2, y + 3 + i * 5, 2, 2, (tick + i * 7) % 40 < 20 ? '#00ff44' : '#004422');
+    r(x + 5, y + 3 + i * 5, 2, 2, (tick + i * 13) % 60 < 10 ? '#ff8800' : '#442200');
+    r(x + 8, y + 3 + i * 5, 6, 2, '#222232');
+  }
+  glow(x + 8, y + 17, 10, '#00ff44', 0.12);
+}
+function drawCoffeeMachine(x, y) {
+  r(x, y, 14, 20, '#2a2a35'); r(x + 1, y + 1, 12, 20, '#222230');
+  r(x + 2, y + 2, 10, 8, '#111120'); r(x + 3, y + 3, 8, 6, (tick % 120 < 60) ? '#2a1a00' : '#331800');
+  r(x + 5, y + 4, 4, 4, (tick % 120 < 30) ? '#cc6600' : '#882200');
+  r(x + 3, y + 11, 8, 2, '#333340'); r(x + 5, y + 13, 4, 5, '#1a1520'); r(x + 4, y + 15, 6, 3, '#2a2030');
+  glow(x + 7, y + 6, 8, '#ff8800', 0.15, 0.06);
+}
+function drawSofa(x, y) { r(x, y + 4, 30, 14, '#1a2535'); r(x, y, 30, 6, '#243550'); r(x, y, 5, 18, '#243550'); r(x + 25, y, 5, 18, '#243550'); r(x + 1, y + 15, 28, 3, '#151e2a'); r(x + 5, y + 15, 20, 3, '#152030'); }
+function drawWhiteboardBig(x, y, w, h, lines, col = '#ccccaa') {
+  r(x, y, w, h, col); r(x, y, w, 2, '#888877'); r(x, y + h - 2, w, 2, '#888877'); r(x, y, 2, h, '#888877'); r(x + w - 2, y, 2, h, '#888877');
+  for (let l of lines) { ctx.strokeStyle = l.c || '#33334488'; ctx.lineWidth = vs(l.w || 1); ctx.beginPath(); ctx.moveTo(vx(x + l.x1), vy(y + l.y1)); ctx.lineTo(vx(x + l.x2), vy(y + l.y2)); ctx.stroke(); }
+}
+function drawLight(x, y, col = '#ffffaa', rad = 60) { r(x - 5, y - 1, 10, 3, '#333333'); r(x - 4, y + 1, 8, 1, col); glow(x, y + 1, rad, col.slice(0, 7), 0.25, 0.08); }
+function drawPoster(x, y, w, h, title, col) {
+  r(x, y, w, h, '#0a0a0a'); r(x + 1, y + 1, w - 2, h - 2, '#111111'); r(x + 2, y + 2, w - 4, 5, col + '44');
+  ctx.font = `${vs(2.5)}px "Press Start 2P", monospace`; ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(title, vx(x + w / 2), vy(y + 3));
+}
+function drawRoundTable(x, y, r2, col = '#3a2a10') {
+  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(vx(x), vy(y), vs(r2), 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#2a1a08'; ctx.beginPath(); ctx.arc(vx(x), vy(y), vs(r2 - 1), 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#4a3a1a'; ctx.beginPath(); ctx.arc(vx(x), vy(y), vs(r2 - 2), 0, Math.PI * 2); ctx.fill();
+}
+function drawBarChart(x, y, w, h, col) {
+  r(x, y, w, h, '#080f08'); r(x + 1, y + 1, w - 2, h - 2, '#0a120a');
+  const bars = [5, 9, 6, 11, 8, 13, 7, 10, 12, 6];
+  const bw = Math.floor((w - 4) / bars.length);
+  for (let i = 0; i < bars.length; i++) { const bh = Math.floor((bars[i] / 14) * (h - 5)); r(x + 2 + i * bw, y + h - 3 - bh, bw - 1, bh, col + 'cc'); }
+}
+function drawPackageBox(x, y) { r(x, y + 2, 14, 12, '#7a5a20'); r(x + 1, y, 12, 4, '#9a7a30'); r(x + 5, y, 4, 14, '#8a6a28'); r(x + 1, y + 4, 5, 1, '#5a4018'); }
+function drawWindow(x, y, w, h) {
+  r(x, y, w, h, '#050f18'); r(x + 1, y + 1, w - 2, h - 2, '#071420');
+  r(x + w / 2 - 1, y, 2, h, '#0a1a28'); r(x, y + h / 2 - 1, w, 2, '#0a1a28');
+  for (let s = 0; s < 8; s++) { const sx = (s * 37 + 3) % (w - 4) + 2; const sy = (s * 23 + 5) % (h / 2 - 4) + 2; r(x + sx, y + sy, 1, 1, '#aaaacc'); }
+  const buildings = [3, 7, 12, 9, 5, 14, 8, 6, 11, 4];
+  for (let b = 0; b < buildings.length; b++) { const bx = x + 1 + b * Math.floor((w - 2) / buildings.length); const bh2 = buildings[b]; const bw2 = Math.floor((w - 2) / buildings.length) - 1; r(bx, y + h - 1 - bh2, bw2, bh2, '#0c1a2a'); if (bh2 > 5) r(bx + 1, y + h - bh2, 1, 1, '#ffff44'); }
+}
+
+const AGENTS = [
+  { id: 'planner', name: 'PLANNER', role: '/planejar-plugin', col: '#aaff44', shirtCol: '#4a7a15', hairCol: '#2a1400', skinCol: '#ffcc88', desk: {x: 52, y: 100}, zone: {xMin:25,xMax:170,yMin:90,yMax:185}, meetSpot: {x: 480, y: 255}, x: 66, y: 125, tx: 66, ty: 125, state: 'working', timer: 250, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [10,7,12,8], glowCol: '#aaff44', tasks: ['Entrevistando usuario...','5 camadas de contexto...','Gerando plano.md...','Mapeando requisitos...','Definindo arquitetura...'] },
+  { id: 'extension', name: 'EXTENSION', role: '/criar-extension', col: '#ffaa44', shirtCol: '#6a4018', hairCol: '#111111', skinCol: '#cc9966', desk: {x: 210, y: 80}, zone: {xMin:200,xMax:345,yMin:70,yMax:155}, meetSpot: {x: 340, y: 255}, x: 224, y: 105, tx: 224, ty: 105, state: 'working', timer: 120, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [9,13,7,11], glowCol: '#ffaa44', tasks: ['Criando .extension...','Gerando extension.json...','Montando _layout.yaml...','Estrutura de pastas...','Bundle inicial OK!'] },
+  { id: 'tabmaker', name: 'TAB MAKER', role: '/criar-tab', col: '#ff8822', shirtCol: '#5a3010', hairCol: '#330000', skinCol: '#ffcc88', desk: {x: 355, y: 80}, zone: {xMin:350,xMax:490,yMin:70,yMax:155}, meetSpot: {x: 400, y: 255}, x: 369, y: 105, tx: 369, ty: 105, state: 'idle', timer: 80, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [8,12,6,10], glowCol: '#ff8822', tasks: ['Adicionando tab Revit...','Configurando ribbon...','Ordem preservada!','Tab criada com sucesso...','Registrando no layout...'] },
+  { id: 'panel', name: 'PANEL', role: '/criar-panel', col: '#ffcc66', shirtCol: '#7a6010', hairCol: '#1a1a00', skinCol: '#cc9966', desk: {x: 210, y: 145}, zone: {xMin:200,xMax:345,yMin:140,yMax:215}, meetSpot: {x: 280, y: 255}, x: 224, y: 170, tx: 224, ty: 170, state: 'idle', timer: 50, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [11,8,9,13], glowCol: '#ffcc66', tasks: ['Agrupando botoes...','Panel criado no ribbon...','Layout do panel OK...','Espacamento correto...','Panel sincronizado!'] },
+  { id: 'pulldown', name: 'PULLDOWN', role: '/criar-pulldown', col: '#ffee44', shirtCol: '#6a6010', hairCol: '#221100', skinCol: '#ffcc88', desk: {x: 355, y: 145}, zone: {xMin:350,xMax:490,yMin:140,yMax:215}, meetSpot: {x: 440, y: 255}, x: 369, y: 170, tx: 369, ty: 170, state: 'working', timer: 190, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [7,11,9,6], glowCol: '#ffee44', tasks: ['Criando dropdown...','Sub-itens configurados...','PulldownButton OK...','Hierarquia definida...','Menu expandido!'] },
+  { id: 'formwpf', name: 'FORM WPF', role: '/criar-form-wpf', col: '#cc66ff', shirtCol: '#4a1a6a', hairCol: '#111111', skinCol: '#ffcc88', desk: {x: 560, y: 80}, zone: {xMin:545,xMax:680,yMin:70,yMax:155}, meetSpot: {x: 600, y: 255}, x: 574, y: 105, tx: 574, ty: 105, state: 'working', timer: 160, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [10,6,12,9], glowCol: '#cc66ff', tasks: ['Desenhando XAML...','WPF form customizado...','Handler integrado...','ViewModel criado...','Formulario renderizando!'] },
+  { id: 'dockable', name: 'DOCKABLE', role: '/criar-dockable', col: '#aa44ff', shirtCol: '#3a1055', hairCol: '#330033', skinCol: '#cc9966', desk: {x: 700, y: 80}, zone: {xMin:690,xMax:825,yMin:70,yMax:155}, meetSpot: {x: 740, y: 255}, x: 714, y: 105, tx: 714, ty: 105, state: 'idle', timer: 70, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [8,13,7,11], glowCol: '#aa44ff', tasks: ['Painel ancorado...','startup.py pronto...','XAML + Provider...','Singleton configurado...','6 armadilhas evitadas!'] },
+  { id: 'pushbutton', name: 'PUSHBUTTON', role: '/criar-pushbutton', col: '#44aaff', shirtCol: '#10406a', hairCol: '#111111', skinCol: '#ffcc88', desk: {x: 220, y: 310}, zone: {xMin:210,xMax:345,yMin:300,yMax:430}, meetSpot: {x: 280, y: 255}, x: 234, y: 335, tx: 234, ty: 335, state: 'working', timer: 200, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [12,8,13,7], glowCol: '#44aaff', tasks: ['Bundle completo...','script.py gerado!','Icone dual Iconify...','layout.yaml OK!','Pushbutton pronto!'] },
+  { id: 'stack', name: 'STACK', role: '/criar-stack', col: '#2288ff', shirtCol: '#0a2a55', hairCol: '#220022', skinCol: '#cc9966', desk: {x: 350, y: 310}, zone: {xMin:340,xMax:475,yMin:300,yMax:430}, meetSpot: {x: 400, y: 255}, x: 364, y: 335, tx: 364, ty: 335, state: 'idle', timer: 90, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [9,7,11,8], glowCol: '#2288ff', tasks: ['Empilhando botoes...','2 pushbuttons no stack...','Espaco otimizado!','3 itens configurados...','Stack vertical OK!'] },
+  { id: 'scripter', name: 'SCRIPTER', role: '/criar-script', col: '#6699ff', shirtCol: '#1a2055', hairCol: '#1a1a1a', skinCol: '#ffcc88', desk: {x: 480, y: 310}, zone: {xMin:470,xMax:595,yMin:300,yMax:430}, meetSpot: {x: 530, y: 255}, x: 494, y: 335, tx: 494, ty: 335, state: 'working', timer: 140, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [11,13,8,10], glowCol: '#6699ff', tasks: ['Preenchendo script.py...','IronPython gerado...','Sem preview pra simples...','Codigo direto!','Script funcional!'] },
+  { id: 'installer', name: 'INSTALLER', role: '/criar-instalador', col: '#44ffcc', shirtCol: '#105a40', hairCol: '#2a1a00', skinCol: '#cc9966', desk: {x: 25, y: 300}, zone: {xMin:15,xMax:155,yMin:290,yMax:395}, meetSpot: {x: 90, y: 255}, x: 39, y: 325, tx: 39, ty: 325, state: 'working', timer: 180, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [8,10,7,12], glowCol: '#44ffcc', tasks: ['Gerando .iss Inno...','Instalador .exe pronto!','Configurando paths...','Pacote profissional!','Distribuicao OK!'] },
+  { id: 'migrador', name: 'MIGRADOR', role: '/migrar-csharp', col: '#22ffaa', shirtCol: '#0a3a28', hairCol: '#111111', skinCol: '#ffcc88', desk: {x: 25, y: 380}, zone: {xMin:15,xMax:155,yMin:370,yMax:455}, meetSpot: {x: 90, y: 255}, x: 39, y: 405, tx: 39, ty: 405, state: 'idle', timer: 60, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [10,7,11,9], glowCol: '#22ffaa', tasks: ['Portando Python -> C#...','net48/net8 OK!','Add-in nativo gerado...','Ribbon hooks prontos...','Migracao completa!'] },
+  { id: 'iconista', name: 'ICONISTA', role: '/buscar-icone', col: '#ff66aa', shirtCol: '#5a1540', hairCol: '#330000', skinCol: '#ffcc88', desk: {x: 620, y: 300}, zone: {xMin:610,xMax:740,yMin:290,yMax:375}, meetSpot: {x: 480, y: 255}, x: 634, y: 325, tx: 634, ty: 325, state: 'working', timer: 160, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [9,6,13,8], glowCol: '#ff66aa', tasks: ['200k icones Iconify...','150 bibliotecas!','Icone dual gerado...','Buscando por termo...','Icone encontrado!'] },
+  { id: 'apiguru', name: 'API GURU', role: '/consultar-api', col: '#ff4488', shirtCol: '#550a30', hairCol: '#111111', skinCol: '#cc9966', desk: {x: 750, y: 300}, zone: {xMin:740,xMax:870,yMin:290,yMax:375}, meetSpot: {x: 540, y: 255}, x: 764, y: 325, tx: 764, ty: 325, state: 'idle', timer: 40, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [11,9,7,13], glowCol: '#ff4488', tasks: ['Consultando Revit API...','FilteredElementCollector...','Exemplo retornado!','Dicionario completo!','ElementId encontrado!'] },
+  { id: 'auditor', name: 'AUDITOR', role: '/auditar-extension', col: '#ff8866', shirtCol: '#5a2a10', hairCol: '#2a0a00', skinCol: '#ffcc88', desk: {x: 620, y: 385}, zone: {xMin:610,xMax:740,yMin:375,yMax:455}, meetSpot: {x: 600, y: 255}, x: 634, y: 408, tx: 634, ty: 408, state: 'working', timer: 220, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [8,12,10,7], glowCol: '#ff8866', tasks: ['30 armadilhas checadas...','Severidade: critica!','Auditoria completa!','0 erros criticos!','Relatorio gerado!'] },
+  { id: 'debugger', name: 'DEBUGGER', role: '/debugar-pyrevit', col: '#ff6644', shirtCol: '#4a1a08', hairCol: '#111111', skinCol: '#cc9966', desk: {x: 750, y: 385}, zone: {xMin:740,xMax:870,yMin:375,yMax:455}, meetSpot: {x: 660, y: 255}, x: 764, y: 408, tx: 764, ty: 408, state: 'idle', timer: 30, speechText: '', speechTimer: 0, speechAlpha: 0, screenLines: [13,10,8,11], glowCol: '#ff6644', tasks: ['No module _wpf fixado!','Botao nao aparece?...','Lentidao identificada...','Stack trace analisado!','Bug resolvido!'] }
+];
+
+function drawRooms() {
+  r(0, 0, VW, VH, '#060e06');
+  drawFloor(12, 20, 180, 200, '#0d180d', '#111a11');
+  drawFloor(195, 20, 305, 200, '#14100a', '#181408');
+  drawFloor(503, 20, 205, 200, '#100a18', '#150d1e');
+  drawFloor(711, 20, 240, 200, '#08100a', '#0c150d');
+  drawFloor(12, 220, 940, 45, '#0c0c0c', '#111111');
+  drawFloor(12, 265, 195, 210, '#0a1418', '#0d171c');
+  drawFloor(210, 265, 400, 210, '#080e18', '#0b1220');
+  drawFloor(613, 265, 340, 210, '#180a10', '#1e0d16');
+  drawWall(0, 0, VW, 22); drawWall(0, 0, 14, VH); drawWall(VW - 14, 0, 14, VH); drawWall(0, VH - 18, VW, 18);
+  drawPartitionV(192, 20, 200); drawPartitionV(500, 20, 200); drawPartitionV(708, 20, 200);
+  drawPartitionV(207, 265, 210); drawPartitionV(610, 265, 210);
+  drawPartitionH(12, 218, 940); drawPartitionH(12, 263, 940);
+}
+
+function drawRoomLabels() {
+  const labels = [
+    { text: 'CONCEPCAO',    x: 102,  y: 22, col: '#aaff44' },
+    { text: 'ESTRUTURA',    x: 347,  y: 22, col: '#ffaa44' },
+    { text: 'INTERFACE',    x: 603,  y: 22, col: '#cc66ff' },
+    { text: 'DISTRIBUICAO', x: 109,  y: 267, col: '#44ffcc' },
+    { text: 'CODIGO LAB',   x: 407,  y: 267, col: '#44aaff' },
+    { text: 'UTILITARIAS',  x: 782,  y: 267, col: '#ff66aa' },
+  ];
+  for (const lb of labels) {
+    ctx.font = `${vs(3)}px "Press Start 2P", monospace`;
+    ctx.fillStyle = lb.col + '55';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(lb.text, vx(lb.x), vy(lb.y));
+  }
+}
+
+function drawDecorations() {
+  drawLight(102, 22, '#aaff8840', 70);
+  drawPlantTall(15, 145); drawPlantTall(172, 145);
+  drawBookshelf(15, 30, 28, 30);
+  drawWhiteboardBig(45, 30, 80, 45, [
+    {x1:5,y1:8,x2:35,y2:8,c:'#33334455',w:1},{x1:5,y1:8,x2:5,y2:30,c:'#33334455',w:1},
+    {x1:5,y1:30,x2:35,y2:30,c:'#33334455',w:1},{x1:35,y1:8,x2:35,y2:30,c:'#33334455',w:1},
+    {x1:35,y1:18,x2:50,y2:18,c:'#44444455',w:1},{x1:50,y1:12,x2:50,y2:28,c:'#44444455',w:1},
+    {x1:50,y1:12,x2:70,y2:12,c:'#44444455',w:1},{x1:50,y1:28,x2:70,y2:28,c:'#44444455',w:1},
+  ]);
+  drawDeskL(30, 100); drawChairFancy(30, 100); drawMonitor(30, 100, AGENTS[0].screenLines, '#aaff44');
+  drawPlant(150, 180);
+
+  drawLight(285, 22, '#ffaa4440', 80); drawLight(420, 22, '#ffaa4440', 80);
+  drawBookshelf(489, 30, 18, 22); drawBarChart(489, 54, 18, 22, '#ffaa44');
+  drawPlant(196, 60); drawPlant(480, 60); drawPlant(196, 185);
+  drawDesk(210, 80);   drawMonitor(210, 80, AGENTS[1].screenLines, '#ffaa44'); drawChair(210, 80);
+  drawDesk(355, 80);   drawMonitor(355, 80, AGENTS[2].screenLines, '#ff8822'); drawChair(355, 80);
+  drawDesk(210, 145);  drawMonitor(210, 145, AGENTS[3].screenLines, '#ffcc66'); drawChair(210, 145);
+  drawDesk(355, 145);  drawMonitor(355, 145, AGENTS[4].screenLines, '#ffee44'); drawChair(355, 145);
+  drawRoundTable(315, 124, 10, '#2a1808');
+
+  drawLight(600, 22, '#cc66ff40', 70); drawLight(760, 22, '#cc66ff40', 70);
+  drawWindow(510, 28, 40, 50); drawWindow(860, 28, 40, 50);
+  drawPoster(680, 30, 30, 22, 'XAML', '#cc66ff');
+  drawPoster(720, 30, 30, 22, 'WPF', '#aa44ff');
+  drawPlant(509, 170); drawCactus(830, 170);
+  drawDesk(560, 80);   drawMonitor(560, 80, AGENTS[5].screenLines, '#cc66ff'); drawChairFancy(560, 80);
+  drawDesk(700, 80);   drawMonitor(700, 80, AGENTS[6].screenLines, '#aa44ff'); drawChairFancy(700, 80);
+  drawWhiteboardBig(830, 30, 80, 45, [
+    {x1:5,y1:5,x2:75,y2:5,c:'#aa44ff55',w:1},{x1:5,y1:5,x2:5,y2:40,c:'#aa44ff55',w:1},
+    {x1:5,y1:40,x2:75,y2:40,c:'#aa44ff55',w:1},{x1:75,y1:5,x2:75,y2:40,c:'#aa44ff55',w:1},
+    {x1:20,y1:5,x2:20,y2:40,c:'#88224488',w:1},{x1:5,y1:20,x2:75,y2:20,c:'#88224488',w:1},
+  ]);
+
+  drawLight(200, 225, '#ffffff30', 50); drawLight(480, 225, '#ffffff30', 50); drawLight(760, 225, '#ffffff30', 50);
+  drawCoffeeMachine(450, 228);
+  drawSofa(160, 227); drawSofa(620, 227);
+  drawPlant(130, 225); drawPlant(590, 225); drawPlant(850, 225);
+  drawRoundTable(480, 243, 14, '#1a1a10');
+  for (let i = 0; i < 6; i++) {
+    const ang = (i / 6) * Math.PI * 2;
+    const cx = 480 + Math.cos(ang) * 22; const cy = 243 + Math.sin(ang) * 16;
+    r(Math.round(cx - 4), Math.round(cy - 3), 8, 6, '#1a2535');
+  }
+
+  drawLight(109, 270, '#44ffcc40', 60);
+  drawServerRack(140, 290); drawServerRack(158, 290);
+  drawPackageBox(15, 350); drawPackageBox(30, 356); drawPackageBox(15, 367); drawPackageBox(142, 380);
+  drawDeskStand(25, 300); drawMonitor(25, 300, AGENTS[10].screenLines, '#44ffcc'); r(16, 325, 3, 5, '#111');
+  drawDesk(25, 380); drawMonitor(25, 380, AGENTS[11].screenLines, '#22ffaa'); drawChair(25, 380);
+
+  drawLight(340, 270, '#44aaff40', 80); drawLight(500, 270, '#44aaff40', 80);
+  drawWhiteboardBig(210, 268, 80, 40, [
+    {x1:5,y1:6,x2:30,y2:6,c:'#44aaff66',w:1},{x1:5,y1:12,x2:40,y2:12,c:'#44aaff44',w:1},
+    {x1:5,y1:18,x2:25,y2:18,c:'#44aaff44',w:1},{x1:5,y1:24,x2:35,y2:24,c:'#44aaff44',w:1},
+    {x1:5,y1:30,x2:20,y2:30,c:'#44aaff44',w:1},
+  ]);
+  drawPlant(210, 380); drawPlant(590, 380);
+  drawDesk(220, 310, 36); drawMonitor(220, 310, AGENTS[7].screenLines, '#44aaff', true); drawChair(220, 310);
+  drawDesk(350, 310, 36); drawMonitor(350, 310, AGENTS[8].screenLines, '#2288ff', true); drawChair(350, 310);
+  drawDesk(480, 310, 36); drawMonitor(480, 310, AGENTS[9].screenLines, '#6699ff', true); drawChair(480, 310);
+
+  drawLight(705, 270, '#ff668840', 60); drawLight(840, 270, '#ff668840', 60);
+  drawBookshelf(613, 268, 26, 30); drawBookshelf(613, 300, 26, 30);
+  drawBarChart(870, 268, 30, 30, '#ff6644');
+  drawPoster(900, 268, 25, 30, 'DEBUG', '#ff6644');
+  drawPlant(613, 420); drawPlant(940, 350);
+  drawDesk(620, 300); drawMonitor(620, 300, AGENTS[12].screenLines, '#ff66aa'); drawChair(620, 300);
+  drawDesk(750, 300); drawMonitor(750, 300, AGENTS[13].screenLines, '#ff4488'); drawChair(750, 300);
+  drawDesk(620, 385); drawMonitor(620, 385, AGENTS[14].screenLines, '#ff8866'); drawChair(620, 385);
+  drawDesk(750, 385); drawMonitor(750, 385, AGENTS[15].screenLines, '#ff6644'); drawChair(750, 385);
+}
+
+function drawCharacter(agent) {
+  const x = agent.x | 0, y = agent.y | 0;
+  const { shirtCol, hairCol, skinCol, state } = agent;
+  const walk = state === 'walking'; const work = state === 'working';
+  const wf = walk ? (tick / 6 | 0) % 2 : 0; const wk = work ? (tick / 14 | 0) % 2 : 0;
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath(); ctx.ellipse(vx(x + 5), vy(y + 18), vs(5), vs(2), 0, 0, Math.PI * 2); ctx.fill();
+  r(x + 2, y + 12, 2, 4 + (wf === 0 ? 1 : 0), '#151525');
+  r(x + 6, y + 12, 2, 4 + (wf === 1 ? 1 : 0), '#151525');
+  r(x + 1, y + 15 + (wf === 0 ? 1 : 0), 3, 2, '#0a0a14');
+  r(x + 6, y + 15 + (wf === 1 ? 1 : 0), 3, 2, '#0a0a14');
+  r(x + 1, y + 5, 8, 8, shirtCol);
+  r(x + 3, y + 5, 4, 2, shirtCol);
+  r(x - 1, y + 6 + (work ? wk : 0), 2, 5, skinCol);
+  r(x + 9, y + 6 - (work ? wk : 0), 2, 5, skinCol);
+  r(x + 4, y + 3, 2, 3, skinCol);
+  r(x + 2, y, 6, 6, skinCol);
+  r(x + 2, y, 6, 2, hairCol);
+  r(x + 2, y, 1, 4, hairCol);
+  r(x + 7, y, 1, 4, hairCol);
+  r(x + 3, y + 2, 1, 2, '#111');
+  r(x + 6, y + 2, 1, 2, '#111');
+  r(x + 3, y + 2, 1, 1, '#ffffffcc');
+  r(x + 6, y + 2, 1, 1, '#ffffffcc');
+  r(x + 4, y + 5, 2, 1, '#cc8866');
+  glow(x + 5, y + 9, 10, agent.col, 0.06, 0.02);
+}
+
+function drawLabel(agent) {
+  const x = agent.x + 5, y = agent.y - 3;
+  ctx.font = `${vs(3.5)}px "Press Start 2P", monospace`;
+  const nw = ctx.measureText(agent.name).width;
+  ctx.font = `${vs(2.5)}px "Press Start 2P", monospace`;
+  const rw = ctx.measureText(agent.role).width;
+  const W = Math.max(nw, rw) + vs(4); const H = vs(11);
+  const lx = vx(x) - W / 2; const ly = vy(y) - H;
+  ctx.fillStyle = 'rgba(0,0,0,0.88)'; ctx.fillRect(lx, ly, W, H);
+  ctx.strokeStyle = agent.col; ctx.lineWidth = Math.max(0.5, vs(0.5)); ctx.strokeRect(lx, ly, W, H);
+  ctx.fillStyle = agent.col; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.font = `${vs(3.5)}px "Press Start 2P", monospace`;
+  ctx.fillText(agent.name, vx(x), ly + vs(1.5));
+  ctx.fillStyle = agent.col + 'aa';
+  ctx.font = `${vs(2.5)}px "Press Start 2P", monospace`;
+  ctx.fillText(agent.role, vx(x), ly + vs(6.5));
+}
+
+function drawBubble(agent) {
+  if (agent.speechAlpha <= 0) return;
+  const x = agent.x + 5, y = agent.y - 16;
+  ctx.font = `${vs(3)}px "Press Start 2P", monospace`;
+  const tw = ctx.measureText(agent.speechText).width;
+  const W = tw + vs(8), H = vs(12);
+  const bx = vx(x) - W / 2, by = vy(y) - H;
+  ctx.globalAlpha = Math.min(1, agent.speechAlpha);
+  ctx.fillStyle = '#001400'; ctx.fillRect(bx, by, W, H);
+  ctx.strokeStyle = agent.col; ctx.lineWidth = Math.max(0.5, vs(0.5)); ctx.strokeRect(bx, by, W, H);
+  ctx.fillStyle = '#001400';
+  ctx.beginPath();
+  ctx.moveTo(vx(x) - vs(2), vy(y));
+  ctx.lineTo(vx(x) + vs(2), vy(y));
+  ctx.lineTo(vx(x), vy(y) + vs(4));
+  ctx.fill();
+  ctx.fillStyle = agent.col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = `${vs(3)}px "Press Start 2P", monospace`;
+  ctx.fillText(agent.speechText, vx(x), by + H / 2);
+  ctx.globalAlpha = 1;
+}
+
+let speechCooldown = 0;
+function moveToward(agent, tx, ty, spd) {
+  const dx = tx - agent.x, dy = ty - agent.y;
+  const d = Math.sqrt(dx * dx + dy * dy);
+  if (d < spd) { agent.x = tx; agent.y = ty; return true; }
+  agent.x += dx / d * spd; agent.y += dy / d * spd; return false;
+}
+function sayTask(agent) {
+  if (speechCooldown > 0) return;
+  agent.speechText = agent.tasks[Math.floor(Math.random() * agent.tasks.length)];
+  agent.speechTimer = 200; speechCooldown = 25;
+}
+function updateAgent(agent) {
+  agent.timer--;
+  if (speechCooldown > 0) speechCooldown--;
+  if (agent.speechTimer > 0) {
+    agent.speechTimer--;
+    const t = agent.speechTimer;
+    if (t > 180) agent.speechAlpha = (200 - t) / 20;
+    else if (t < 25) agent.speechAlpha = t / 25;
+    else agent.speechAlpha = 1;
+  } else agent.speechAlpha = 0;
+  if (agent.state === 'working') {
+    if (agent.timer <= 0) {
+      const roll = Math.random();
+      if (roll < 0.35) { agent.state = 'walking'; agent.tx = agent.meetSpot.x + (Math.random() - 0.5) * 40; agent.ty = agent.meetSpot.y + (Math.random() - 0.5) * 10; agent.timer = 0; }
+      else { agent.state = 'idle'; agent.timer = 40 + Math.random() * 60 | 0; if (Math.random() < 0.65) sayTask(agent); }
+    }
+  } else if (agent.state === 'idle') {
+    if (agent.timer <= 0) {
+      const roll = Math.random();
+      if (roll < 0.55) { agent.state = 'walking'; agent.tx = agent.desk.x + 14; agent.ty = agent.desk.y + 20; agent.timer = 0; }
+      else { agent.state = 'walking'; agent.tx = agent.zone.xMin + Math.random() * (agent.zone.xMax - agent.zone.xMin); agent.ty = agent.zone.yMin + Math.random() * (agent.zone.yMax - agent.zone.yMin); agent.timer = 0; }
+    }
+  } else if (agent.state === 'walking') {
+    const spd = 0.55;
+    const arrived = moveToward(agent, agent.tx, agent.ty, spd);
+    if (arrived) {
+      const onDesk = Math.abs(agent.tx - (agent.desk.x + 14)) < 2 && Math.abs(agent.ty - (agent.desk.y + 20)) < 2;
+      const onMeet = Math.abs(agent.tx - agent.meetSpot.x) < 50;
+      if (onDesk) { agent.state = 'working'; agent.timer = 180 + Math.random() * 300 | 0; if (Math.random() < 0.6) sayTask(agent); }
+      else if (onMeet && agent.ty > 220 && agent.ty < 270) { agent.state = 'meeting'; agent.timer = 80 + Math.random() * 120 | 0; sayTask(agent); }
+      else { agent.state = 'idle'; agent.timer = 40 + Math.random() * 60 | 0; }
+    }
+  } else if (agent.state === 'meeting') {
+    if (agent.timer <= 0) { agent.state = 'walking'; agent.tx = agent.desk.x + 14; agent.ty = agent.desk.y + 20; }
+  }
+}
+
+let screenTimer = 0;
+function updateScreens() {
+  screenTimer++;
+  if (screenTimer % 40 === 0) {
+    for (const a of AGENTS) { const i = Math.random() * a.screenLines.length | 0; a.screenLines[i] = 4 + Math.random() * 11 | 0; }
+  }
+}
+
+function drawUI() {
+  r(0, 0, VW, 20, '#040c04');
+  ctx.font = `${vs(4.5)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#4aff4a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('BIM CODER CLAUDE KIT', vx(VW / 2), vy(10));
+  glow(VW / 2, 10, 120, '#44ff44', 0.08, 0.02);
+  const dotY = 15;
+  const totalW = AGENTS.length * 14;
+  const startX = VW / 2 - totalW / 2;
+  for (let i = 0; i < AGENTS.length; i++) {
+    const a = AGENTS[i]; const dx = startX + i * 14;
+    const active = a.state === 'working' || a.state === 'meeting';
+    r(dx, dotY - 2, 4, 4, active ? a.col : '#1a2a1a');
+    if (active) glow(dx + 2, dotY, 5, a.col, 0.4, 0.1);
+  }
+  const now = new Date();
+  const ts = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  ctx.font = `${vs(3.5)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#2a4a2a'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillText(ts, vx(VW - 18), vy(10));
+  ctx.font = `${vs(2.5)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#1a3a1a'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('bimcoder.net  -  16 agentes ativos', vx(VW / 2), vy(VH) - 4);
+}
+
+AGENTS.forEach((a, i) => { a.timer = i * 35 + (Math.random() * 40 | 0); });
+
+function loop() {
+  tick++;
+  updateScreens();
+  for (const a of AGENTS) updateAgent(a);
+  ctx.fillStyle = '#040c04';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawRooms(); drawDecorations(); drawRoomLabels();
+  const sorted = [...AGENTS].sort((a, b) => a.y - b.y);
+  for (const a of sorted) { drawCharacter(a); drawLabel(a); drawBubble(a); }
+  drawUI();
+  requestAnimationFrame(loop);
+}
+loop();
+})();
+</script>
+
 <!-- ========== FOOTER ========== -->
 <footer>
     <div class="container">
