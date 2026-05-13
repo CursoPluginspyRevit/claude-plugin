@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "bimcoder-claude-kit",
+  "description": "Marketplace do toolkit BIM Coder para Claude Code.",
+  "owner": {
+    "name": "BIM Coder",
+    "url": "https://www.youtube.com/@bimcoder"
+  },
+  "plugins": [
+    {
+      "name": "bimcoder-claude-kit",
+      "description": "Toolkit Claude Code para criar plugins pyRevit com IA. Skills de planejamento, criação de extensions, pushbuttons, pulldowns, dockable panes, formulários WPF, migração C# e instalador Inno Setup.",
+      "author": {
+        "name": "BIM Coder",
+        "url": "https://www.youtube.com/@bimcoder"
+      },
+      "category": "development",
+      "source": "./bimcoder-claude-kit",
+      "homepage": "https://github.com/bclabss/bimcoder-claude-kit"
+    }
+  ]
+}
