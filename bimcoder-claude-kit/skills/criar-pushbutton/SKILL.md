@@ -113,9 +113,22 @@ Se aluno responder 3: pular geração de ícones (não recomendado, mas permitid
 Operações em ordem:
 
 1. **Criar a pasta** `{panel}/{NomeBotao}.pushbutton/`
-2. **Gerar o `script.py`**:
-   - Se há `plano.md` aprovado no Passo 3: preencher com base no plano
-   - Caso contrário: boilerplate só
+
+2. **Gerar o `script.py`. NUNCA escreva conteúdo de lógica aqui dentro desta skill.** Tem dois caminhos, ambos delegando ou usando boilerplate seguro:
+
+   **Caminho A. Há `plano.md` aprovado no Passo 3.**
+
+   Crie o `script.py` no disco com apenas o cabeçalho (encoding + dunders). Depois **acione `/criar-script`** passando o caminho do arquivo e o `plano.md` como insumo. A `/criar-script` faz o fluxo completo (incluindo a auto-revisão dupla das 9 regras + validação de API) e retorna o script preenchido.
+
+   Isso é OBRIGATÓRIO porque a `/criar-script` é a única skill que aplica:
+   - Frente 1: 9 Regras Técnicas Absolutas (especialmente a regra 9. nome de tipo via `BuiltInParameter.ALL_MODEL_TYPE_NAME`, NUNCA `.Name`. Falha clássica quando se gera código direto)
+   - Frente 2: validação de cada classe/método/enum contra `references/revit-api-dictionary.md`
+
+   Gerar o conteúdo aqui na `/criar-pushbutton` pula esses checks e produz scripts com armadilhas conhecidas. NÃO faça.
+
+   **Caminho B. Sem plano.md.**
+
+   Criar apenas o boilerplate abaixo. Sem lógica de API, sem risco. Aluno preenche depois rodando `/criar-script` no `script.py` vazio (que vai aplicar as 9 regras + validação de API).
 
 Template do boilerplate (sem plano):
 
@@ -135,7 +148,7 @@ uidoc = revit.uidoc
 
 
 def main():
-    # logica do botao aqui
+    # logica do botao aqui (preencher com /criar-script)
     pass
 
 
@@ -161,13 +174,18 @@ O helper salva `icon.png` (cinza) e `icon.dark.png` (branco) na pasta do bundle.
 
 Se `_layout.yaml` não existir no panel, criar um novo já com o bundle listado.
 
-### Passo 6. Auto-revisão dupla
+### Passo 6. Auto-revisão estrutural (não confundir com conteúdo)
 
-Aplicar Frente 1 (9 regras) ao `script.py` gerado, com foco em:
-- Regra 2: `# -*- coding: utf-8 -*-` presente
-- Regra 5: ícones dual 96x96 (verificar tamanho dos PNGs baixados)
+Esta skill só valida a **estrutura física** criada. A validação do **conteúdo do script** (9 regras técnicas + validação de API) acontece dentro da `/criar-script`, que foi acionada no Passo 5 (Caminho A) ou que será acionada depois pelo aluno (Caminho B).
 
-Se o script foi preenchido com base no `plano.md`, aplicar Frente 2 (validação de API) também.
+Checks estruturais (rápidos, aqui):
+- Encoding `# -*- coding: utf-8 -*-` presente no `script.py` (boilerplate ou preenchido)
+- Ícones `icon.png` + `icon.dark.png` ambos existem, ambos 96x96 PNG
+- Pasta segue convenção `PascalCase.pushbutton` (sem espaços, sem acentos)
+- `bundle.yaml` NÃO existe dentro do `.pushbutton/` (regra: bundle.yaml é só pra panel e pulldown)
+- `_layout.yaml` do panel pai foi atualizado e tem o novo bundle
+
+**Importante.** Esta skill NÃO valida conteúdo de API no script. Se o aluno reportar erro do tipo "usou `.Name` em vez de `ALL_MODEL_TYPE_NAME`" ou similar, o problema é que o script foi preenchido fora da `/criar-script` (ex: aluno colou código manualmente, ou outra skill burlou o protocolo). Solução: rodar `/criar-script` no `script.py` afetado pra reescrever com auto-revisão dupla, ou `/auditar-extension` pra varrer a extension inteira.
 
 ### Passo 7. Confirmar entrega
 
