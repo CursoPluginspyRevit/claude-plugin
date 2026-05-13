@@ -43,7 +43,7 @@ SCRIPT PYREVIT — N ETAPAS
 ============================================================
 ```
 
-ou estrutura numerada por ETAPAs com `API: Classe` e `API: Método`, mude pro **modo RevitFlow Builder** descrito no `CLAUDE.md` (seção "Fluxo Padrão Antes de Gerar Código"). Nesse modo:
+ou estrutura numerada por ETAPAs com `API: Classe` e `API: Método`, mude pro **modo RevitFlow Builder** descrito no `CLAUDE.md`. Nesse modo:
 
 - Não acione `/planejar-plugin`
 - Siga as ETAPAs em ordem, comentando `# ETAPA N` no código
@@ -60,27 +60,16 @@ Determine o caminho do `script.py` a preencher. Em ordem de prioridade:
 1. **Caminho explícito no prompt.** Se o aluno passou (ex: `/criar-script meu-botao.pushbutton/script.py`), use esse caminho
 2. **CWD dentro de `.pushbutton/`.** Se a pasta atual termina em `.pushbutton`, o alvo é `script.py` no cwd
 3. **Pasta única `.pushbutton/` no cwd.** Se tem só uma, perguntar: "Achei um pushbutton em `{caminho}`. É esse?"
-4. **Múltiplos pushbuttons.** Listar todos os `.pushbutton/` da extension atual e pedir pra escolher:
-   ```
-   Achei estes pushbuttons. Qual quer preencher?
-   1. Ferramentas.tab/Cotas.panel/CotarParedes.pushbutton/script.py
-   2. Ferramentas.tab/Cotas.panel/CotarPisos.pushbutton/script.py
-   3. Ferramentas.tab/Relatorios.panel/ListarPortas.pushbutton/script.py
-   ```
+4. **Múltiplos pushbuttons.** Listar todos os `.pushbutton/` da extension atual e pedir pra escolher
 5. **Nenhum encontrado.** Responder: "Não encontrei nenhum pushbutton aqui. Você precisa criar o bundle primeiro com `/criar-pushbutton`. Quer acionar agora?"
 
 ### Passo 3. Coletar a descrição
 
-Se o aluno já descreveu o que quer (no prompt da skill ou em mensagens anteriores), use isso. Confirme em uma linha que você entendeu:
-
-> "Entendi: você quer um script que `{descrição em 1 frase}`. Confirma?"
+Se o aluno já descreveu o que quer (no prompt da skill ou em mensagens anteriores), use isso.
 
 Se não há descrição prévia, pergunte uma vez:
 
 > "Descreva em uma frase o que esse script deve fazer no Revit."
-
-Exemplo de boa resposta do aluno:
-> "cota todas as paredes da view ativa, permitindo escolher o tipo de cota"
 
 Se a resposta for vaga ("um script bom de cotas"), pedir UMA pergunta de refinamento:
 > "Quer cotar paredes, pisos, ou outro elemento? E o usuário escolhe algo antes (tipo de cota, view, seleção)?"
@@ -106,8 +95,6 @@ Se for **não-trivial**, pergunte:
 > 1. Planejar primeiro com `/planejar-plugin`
 > 2. Não, vai direto pro código"
 
-Se aluno escolher 1, acione `/planejar-plugin` passando o contexto e encerre essa skill.
-
 Se for trivial ou aluno escolher seguir, continue.
 
 ### Passo 5. Verificar contexto do arquivo e da extension
@@ -123,7 +110,7 @@ Leia o conteúdo atual de `script.py`:
 
 - **Vazio ou só com boilerplate** (ex: arquivo gerado por `/criar-pushbutton` que tem só header e `pass`). Preencher diretamente.
 - **Já tem código.** Pergunte: "O arquivo já tem código. Quer substituir tudo ou estender?"
-  1. Substituir tudo (vou reescrever do zero)
+  1. Substituir tudo
   2. Estender (mantenho o que tem e adiciono o novo comportamento)
   3. Cancelar
 
@@ -165,10 +152,10 @@ Regras de qualidade (todas vindas do `CLAUDE.md`):
 - **Variáveis e funções em inglês, snake_case.** `walls`, `selected_dimension`, `wall_type`, `get_walls_in_view()`.
 - **Classes em PascalCase.** Se precisar definir uma classe local (ex: `ISelectionFilter` customizado), use `class WallFilter(ISelectionFilter):`.
 - **Comentários em português brasileiro com acentuação.** `# coletar paredes da view ativa`.
-- **UI strings em português brasileiro.** `forms.alert("Selecione uma parede.")`, `TaskDialog.Show("Erro", "Operação cancelada.")`.
-- **Títulos de Transaction em português.** `Transaction(doc, "Cotar paredes da view")`. Aparece no histórico de undo.
+- **UI strings em português brasileiro.** `forms.alert("Selecione uma parede.")`.
+- **Títulos de Transaction em português.** `Transaction(doc, "Cotar paredes da view")`.
 - **Transaction obrigatória pra modificações no modelo.** Padrão `try/except` com `RollBack` no `except`.
-- **Tratamento de erros amigável.** `try/except` capturando exceções e mostrando mensagem pro usuário via `forms.alert` ou `TaskDialog`, não traceback técnico.
+- **Tratamento de erros amigável.** Capturando exceções e mostrando mensagem pro usuário via `forms.alert`, não traceback técnico.
 - **Conversão de unidades explícita.** Se mostrar comprimento, área ou volume pro usuário, sempre converter de pés para metros/cm/m² antes de exibir.
 
 Para tarefas que envolvem seleção do usuário:
@@ -179,7 +166,7 @@ Para criação de elementos:
 
 ### Passo 7. Auto-revisão dupla
 
-Antes de mostrar ao aluno, faça varredura mental em duas frentes (`CLAUDE.md` seção "Auto-Revisão Antes de Entregar").
+Antes de mostrar ou salvar, faça varredura mental em duas frentes (`CLAUDE.md` seção "Auto-Revisão Antes de Entregar").
 
 **Frente 1. As 9 Regras Técnicas Absolutas.** Confirme cada uma:
 
@@ -193,7 +180,7 @@ Antes de mostrar ao aluno, faça varredura mental em duas frentes (`CLAUDE.md` s
 8. Conversão de unidades explícita ao mostrar números pro usuário
 9. Nome de tipo via `BuiltInParameter.ALL_MODEL_TYPE_NAME`, nunca `.Name`
 
-Se alguma falhar, corrige em silêncio antes de mostrar.
+Se alguma falhar, corrige em silêncio.
 
 **Frente 2. Validação de API.** Pra cada classe, método, propriedade ou enum da Revit API citado:
 
@@ -214,30 +201,57 @@ Quando precisar usar uma API com incerteza:
   # Validar antes de testar. Alternativa segura: Y.
   ```
 
-### Passo 8. Mostrar preview e pedir aprovação
+### Passo 8. Decidir entre entrega direta ou preview
 
-Mostre o código completo no chat e pergunte:
+Determine o modo de entrega com base no contexto.
 
-```
-{código completo em bloco markdown}
+**Entrega DIRETA (salvar imediatamente, sem preview):** quando TODAS as condições abaixo forem verdadeiras:
+- O aluno acionou a skill com prompt inline (descrição veio junto no comando, ex: `/criar-script "lista paredes"`) OU em UMA única mensagem no chat
+- O `script.py` alvo estava vazio ou com boilerplate apenas (regra do Passo 5)
+- A descrição era clara e não houve necessidade de pergunta de refinamento no Passo 3
+- A tarefa foi classificada como trivial no Passo 4
 
-Salvar em: {caminho-relativo-ao-cwd}
+Esse é o caso mais comum no dia a dia: aluno tem um script aberto, descreve o que quer numa frase, espera o resultado.
 
-1. Aprovar e salvar
-2. Quero ajustar antes de salvar
-3. Cancelar
-```
+Nesse modo:
+- Pule direto pro Passo 9 (salvar)
+- A confirmação final inclui um resumo do que o script faz em 1 ou 2 linhas
+- Se o aluno quiser ajustar depois, ele pede ajuste pontual (Edição Cirúrgica)
 
-**Se aluno escolher 2 (ajustar):** colete o feedback em uma mensagem ("o que ajustar?") e refaça o código aplicando as mudanças. Volte ao Passo 6 só na parte alterada. Não reescreva o que não foi pedido (Edição Cirúrgica do `CLAUDE.md`).
+**Entrega COM PREVIEW (mostra antes, pede aprovação):** quando QUALQUER uma das condições abaixo for verdadeira:
+- O `script.py` já tinha código (precisa decidir substituir vs estender no Passo 5)
+- O aluno descreveu em modo conversacional ao longo de várias mensagens
+- Foi necessário fazer pergunta de refinamento no Passo 3
+- A tarefa foi não-trivial e o aluno optou por seguir sem `/planejar-plugin`
+- O aluno explicitamente pediu "mostra antes" ou "quero revisar"
+- A skill teve incertezas técnicas que adicionaram comentários de atenção no código
 
-**Se cancelar:** confirme "Ok, cancelado. Nada foi salvo." e encerre.
+Nesse modo:
+- Mostre o código completo no chat
+- Pergunte:
+  ```
+  Salvar em: {caminho-relativo}
+
+  1. Aprovar e salvar
+  2. Quero ajustar antes de salvar
+  3. Cancelar
+  ```
+- Se ajustar: colete o feedback em uma mensagem e refaça aplicando as mudanças (volte ao Passo 6 só na parte alterada. Não reescreva o que não foi pedido, Edição Cirúrgica)
+- Se cancelar: confirme "Ok, cancelado. Nada foi salvo." e encerre
 
 ### Passo 9. Salvar
 
 Escreva o arquivo com encoding UTF-8 (necessário pra acentos nos comentários e UI strings).
 
-Confirme com uma linha:
+**Se foi entrega direta:**
+```
+Script salvo em {caminho-relativo}.
+{Resumo em 1 ou 2 linhas do que o script faz, ex: "Lista todas as paredes da view ativa em relatório formatado, com conversão de pés para metros."}
 
+Se quiser ajustar algo, é só pedir.
+```
+
+**Se foi entrega com preview:**
 ```
 Pronto. Script salvo em {caminho-relativo}.
 ```
@@ -265,93 +279,41 @@ Quando o aluno, depois do script já estar salvo, pedir um ajuste pontual ("reno
 
 ---
 
-## Exemplo de boa execução
+## Exemplos de execução
+
+### Exemplo 1. Entrega direta (caso mais comum)
 
 **Aluno:** `/criar-script "lista todas as paredes da view ativa em um relatório"`
 
 **Skill:**
 
-1. CWD é `MinhaExtensao.extension/Ferramentas.tab/Relatorios.panel/ListarParedes.pushbutton/`. Alvo identificado: `script.py` no cwd.
-2. Descrição clara, sem necessidade de refinar.
-3. Classificação: **trivial** (1 ação: coletar e listar. Sem decisão do usuário, sem UI customizada).
-4. `script.py` atual: vazio (só com header gerado pelo `/criar-pushbutton`).
-5. Nome do botão: "Listar\nParedes". Panel: "Relatorios". Tab: "Ferramentas".
-6. Geração:
+1. CWD é `MinhaExtensao.extension/Ferramentas.tab/Relatorios.panel/ListarParedes.pushbutton/`. Alvo identificado.
+2. Descrição clara, sem refinamento.
+3. Classificação: **trivial**.
+4. `script.py` atual: vazio.
+5. Auto-revisão passa.
+6. **Salva direto** (Passo 8 → Entrega Direta):
 
-```python
-# -*- coding: utf-8 -*-
-"""Lista todas as paredes da view ativa em um relatorio formatado."""
+```
+Script salvo em ListarParedes.pushbutton/script.py.
+Lista todas as paredes da view ativa em relatório formatado, com tipo, comprimento e altura. Conversão pés → metros aplicada. Sem modificação no modelo (sem Transaction).
 
-__title__ = "Listar\nParedes"
-__author__ = "BIM Coder"
-__doc__ = "Coleta todas as paredes visiveis na view ativa e exibe um relatorio com nome do tipo, comprimento e altura."
-
-from pyrevit import revit, output
-from Autodesk.Revit.DB import (
-    FilteredElementCollector, BuiltInCategory, BuiltInParameter,
-    UnitUtils, UnitTypeId
-)
-
-doc = revit.doc
-uidoc = revit.uidoc
-
-
-def main():
-    # coletar paredes da view ativa
-    walls = (
-        FilteredElementCollector(doc, doc.ActiveView.Id)
-        .OfCategory(BuiltInCategory.OST_Walls)
-        .WhereElementIsNotElementType()
-        .ToElements()
-    )
-
-    if not walls:
-        from pyrevit import forms
-        forms.alert("Nenhuma parede encontrada na view ativa.")
-        return
-
-    # montar dados do relatorio
-    rows = []
-    for wall in walls:
-        # nome do tipo via BuiltInParameter (regra 9 do kit)
-        type_elem = doc.GetElement(wall.GetTypeId())
-        type_name = type_elem.get_Parameter(
-            BuiltInParameter.ALL_MODEL_TYPE_NAME
-        ).AsString()
-
-        # comprimento em metros (a API retorna pes internamente)
-        length_param = wall.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH)
-        length_m = UnitUtils.ConvertFromInternalUnits(
-            length_param.AsDouble(), UnitTypeId.Meters
-        ) if length_param else 0.0
-
-        # altura em metros
-        height_param = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM)
-        height_m = UnitUtils.ConvertFromInternalUnits(
-            height_param.AsDouble(), UnitTypeId.Meters
-        ) if height_param else 0.0
-
-        rows.append([type_name, "{:.2f} m".format(length_m), "{:.2f} m".format(height_m)])
-
-    # mostrar relatorio
-    op = output.get_output()
-    op.print_md("## Paredes da view: {}".format(doc.ActiveView.Name))
-    op.print_md("Total: {} paredes".format(len(walls)))
-    op.print_table(
-        table_data=rows,
-        title="Inventario de Paredes",
-        columns=["Tipo", "Comprimento", "Altura"]
-    )
-
-
-if __name__ == "__main__":
-    main()
+Se quiser ajustar algo, é só pedir.
 ```
 
-7. Auto-revisão dupla: tudo OK. Regra 1 não se aplica (sem modificação no modelo, sem Transaction). Regra 9 cumprida. APIs validadas: `OST_Walls`, `CURVE_ELEM_LENGTH`, `WALL_USER_HEIGHT_PARAM`, `ALL_MODEL_TYPE_NAME`, `UnitTypeId.Meters` todos no dicionário.
-8. Mostra preview no chat. Aluno aprova.
-9. Salva em `MinhaExtensao.extension/Ferramentas.tab/Relatorios.panel/ListarParedes.pushbutton/script.py`.
-10. Sugestão: "Não vi ícone no bundle. Quer rodar `/buscar-icone` pra adicionar?"
+Aluno abre o Revit, testa, funciona. Se quiser mudar algo: "renomeia o título pra 'Inventário de Paredes'", e a skill faz Edição Cirúrgica.
+
+### Exemplo 2. Entrega com preview (caso menos comum)
+
+**Aluno:** "preciso cotar paredes" *(em conversa, sem comando)*
+
+**Skill:**
+1. Pergunta: "Quais paredes? Todas da view, só as selecionadas, ou da view inteira do projeto?"
+2. Aluno responde: "da view ativa, mas com um tipo de cota customizado"
+3. Skill: "O tipo de cota é fixo ou o usuário escolhe antes?"
+4. Aluno: "usuário escolhe"
+
+Múltiplas mensagens de conversa = **Entrega com Preview**. Skill mostra código completo, pede aprovação, ajusta se preciso.
 
 ---
 
@@ -364,3 +326,4 @@ if __name__ == "__main__":
 - **Não esquecer `# -*- coding: utf-8 -*-`** na primeira linha, mesmo que o código não tenha acentos no momento.
 - **Não fazer mais de uma pergunta por vez** ao aluno. Encadear perguntas atrapalha o fluxo.
 - **Não revelar pro aluno que rodou auto-revisão** ou consultou references. Entregue o código limpo.
+- **Não pedir aprovação prévia em entrega direta.** Se as 4 condições do Passo 8 forem verdadeiras (prompt inline, script vazio, descrição clara, tarefa trivial), salve direto e mostre resumo.
