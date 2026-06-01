@@ -24,7 +24,7 @@ Você é especialista em criar extensions pyRevit. Esta skill gera a estrutura r
 
 ### Passo 0. Carregar contexto
 
-Confirme que o `CLAUDE.md` está carregado e tem em mente:
+Leia `references/regras-essenciais.md` uma vez se as regras ainda não estiverem no seu contexto. Tenha em mente:
 - `references/pyrevit-fundamentals.md` (estrutura de extension, `extension.json`, layout)
 
 ### Passo 1. Detectar contexto da pasta atual

@@ -336,6 +336,7 @@ Estes arquivos são fonte de verdade técnica. Consulte antes de gerar código n
 
 | Arquivo | Conteúdo |
 |---|---|
+| `references/regras-essenciais.md` | **Núcleo operacional condensado** (9 Regras, Estilo de API, idioma, trivial/não-trivial, RevitFlow, auto-revisão). É o que as skills leem em runtime. ~60 linhas. |
 | `references/pyrevit-fundamentals.md` | Estrutura de extensions, bundles, layout, ícones |
 | `references/revit-api-dictionary.md` | Dicionário de classes e métodos da Revit API |
 | `references/dockable-pane-pattern.md` | Padrão completo de dockable pane (startup, singleton, XAML, ExternalEvent) |
@@ -343,7 +344,9 @@ Estes arquivos são fonte de verdade técnica. Consulte antes de gerar código n
 | `references/inno-setup-template.iss` | Template de instalador Inno Setup |
 | `references/armadilhas.md` | Catálogo das 30+ armadilhas conhecidas com causa e fix |
 
-Estes arquivos serão criados nas próximas etapas do plugin. Em caso de dúvida sobre um padrão técnico, consulte primeiro a referência correspondente; só improvise se não houver entrada.
+> **Nota de arquitetura.** Este `CLAUDE.md` é documentação do projeto — o Claude Code **não** carrega o CLAUDE.md de um plugin em runtime (só o do diretório de trabalho). Por isso as skills NÃO dependem dele: o núcleo operacional que elas precisam vive em `references/regras-essenciais.md`, lido sob demanda. Ao editar uma regra técnica aqui, atualize também o `regras-essenciais.md` para os dois não divergirem.
+
+Em caso de dúvida sobre um padrão técnico, consulte primeiro a referência correspondente; só improvise se não houver entrada.
 
 ---
 
@@ -437,23 +440,23 @@ Não diga ao aluno que rodou auto-revisão. Apenas entregue o código limpo. A �
 
 ## Skills Disponíveis
 
-Lista de referência. Skills marcadas com (em construção) ainda não foram implementadas.
+Lista de referência. As 16 skills estão implementadas.
 
 | Skill | Quando usar |
 |---|---|
-| `/planejar-plugin` | Toda tarefa não-trivial. Faz entrevista em 5 camadas e gera `plano.md` (em construção) |
-| `/criar-extension` | Criar uma extension pyRevit do zero (em construção) |
-| `/criar-tab` | Adicionar tab nova a uma extension (em construção) |
-| `/criar-panel` | Adicionar panel novo a uma tab (em construção) |
-| `/criar-pushbutton` | Criar pushbutton completo: script, ícones, bundle, layout (em construção) |
+| `/planejar-plugin` | Toda tarefa não-trivial. Faz entrevista em 5 camadas e gera `plano.md` |
+| `/criar-extension` | Criar uma extension pyRevit do zero |
+| `/criar-tab` | Adicionar tab nova a uma extension |
+| `/criar-panel` | Adicionar panel novo a uma tab |
+| `/criar-pushbutton` | Criar pushbutton completo: script, ícones, bundle, layout |
 | `/criar-script` | Preencher o `script.py` aberto no editor a partir de descrição em linguagem natural. Atua direto no arquivo em foco, não cria estrutura nova |
-| `/criar-pulldown` | Criar pulldown com sub-pushbuttons (em construção) |
-| `/criar-stack` | Empilhar 2 ou 3 botões verticalmente (em construção) |
-| `/criar-dockable-pane` | Criar painel ancorado nativo (em construção) |
-| `/criar-form-wpf` | Criar formulário WPF customizado (em construção) |
-| `/criar-instalador-inno` | Gerar instalador Inno Setup (em construção) |
-| `/migrar-csharp` | Portar pushbutton Python para C# (em construção) |
-| `/buscar-icone` | Sugerir ícones do Iconify a partir de termo em português (em construção) |
-| `/auditar-extension` | Varrer extension procurando armadilhas (em construção) |
-| `/consultar-api` | Buscar rápido no dicionário da Revit API (em construção) |
-| `/debugar-pyrevit` | Diagnóstico de erros comuns (lentidão, `_wpf`, módulo não encontrado) (em construção) |
+| `/criar-pulldown` | Criar pulldown com sub-pushbuttons |
+| `/criar-stack` | Empilhar 2 ou 3 botões verticalmente |
+| `/criar-dockable-pane` | Criar painel ancorado nativo |
+| `/criar-form-wpf` | Criar formulário WPF customizado |
+| `/criar-instalador-inno` | Gerar instalador Inno Setup |
+| `/migrar-csharp` | Portar pushbutton Python para C# |
+| `/buscar-icone` | Sugerir ícones do Iconify a partir de termo em português |
+| `/auditar-extension` | Varrer extension procurando armadilhas |
+| `/consultar-api` | Buscar rápido no dicionário da Revit API |
+| `/debugar-pyrevit` | Diagnóstico de erros comuns (lentidão, `_wpf`, módulo não encontrado) |

@@ -27,7 +27,7 @@ Você é especialista em criar bundles pyRevit. Esta skill cria a estrutura comp
 
 ### Passo 0. Carregar contexto
 
-Confirme que o `CLAUDE.md` está carregado. Tenha em mente:
+Leia `references/regras-essenciais.md` uma vez se as regras ainda não estiverem no seu contexto. Tenha em mente:
 - `references/pyrevit-fundamentals.md` (estrutura de bundles, `_layout.yaml`, ícones)
 - `references/armadilhas.md` (armadilha 5: ícones 96x96 dual)
 - `helpers/icon-fetcher.py` (helper Python pra baixar ícones do Iconify)

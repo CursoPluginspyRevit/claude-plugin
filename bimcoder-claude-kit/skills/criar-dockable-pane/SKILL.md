@@ -25,7 +25,7 @@ Você é especialista em criar dockable panes pyRevit. Esta skill aplica o padr�
 
 ### Passo 0. Carregar contexto
 
-Confirme que o `CLAUDE.md` está carregado. **Leia obrigatoriamente** `references/dockable-pane-pattern.md` antes de gerar qualquer código (esse arquivo tem 391 linhas de padrões + armadilhas específicas).
+Leia `references/regras-essenciais.md` uma vez se as regras ainda não estiverem no seu contexto (o `CLAUDE.md` não é carregado em runtime). Para esta skill, **leia também** `references/dockable-pane-pattern.md` antes de gerar o código — dockable pane tem armadilhas específicas que justificam a consulta ao padrão completo.
 
 Armadilhas relevantes do `references/armadilhas.md`:
 - #4 (imports WPF no startup)

@@ -25,7 +25,7 @@ Você é especialista em criar tabs (abas) do ribbon pyRevit. Esta skill adicion
 
 ### Passo 0. Carregar contexto
 
-Confirme que o `CLAUDE.md` está carregado. Consulte `references/pyrevit-fundamentals.md` se precisar lembrar da estrutura de bundle.yaml e _layout.yaml.
+Leia `references/regras-essenciais.md` uma vez se as regras ainda não estiverem no seu contexto (o `CLAUDE.md` não é carregado em runtime). Consulte `references/pyrevit-fundamentals.md` se precisar lembrar da estrutura de bundle.yaml e _layout.yaml.
 
 ### Passo 1. Identificar a extension destino
 

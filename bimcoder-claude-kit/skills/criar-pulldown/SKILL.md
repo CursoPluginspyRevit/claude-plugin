@@ -25,7 +25,7 @@ Você é especialista em criar pulldowns pyRevit. Esta skill cria a estrutura co
 
 ### Passo 0. Carregar contexto
 
-Confirme que o `CLAUDE.md` está carregado. Tenha em mente:
+Leia `references/regras-essenciais.md` uma vez se as regras ainda não estiverem no seu contexto. Tenha em mente:
 - `references/pyrevit-fundamentals.md` (estrutura de pulldown, bundle.yaml com title+tooltip)
 - `helpers/icon-fetcher.py` (pra baixar ícone)
 

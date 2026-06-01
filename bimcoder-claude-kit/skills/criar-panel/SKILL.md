@@ -25,7 +25,7 @@ Você é especialista em criar panels (agrupamentos de botões) do ribbon pyRevi
 
 ### Passo 0. Carregar contexto
 
-Confirme que o `CLAUDE.md` está carregado. Consulte `references/pyrevit-fundamentals.md` se precisar.
+Leia `references/regras-essenciais.md` uma vez se as regras ainda não estiverem no seu contexto. Consulte `references/pyrevit-fundamentals.md` se precisar.
 
 ### Passo 1. Identificar a tab destino
 

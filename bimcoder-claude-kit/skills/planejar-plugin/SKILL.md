@@ -39,7 +39,7 @@ A entrevista força o aluno a pensar antes de codar, e o plano fica documentado.
 
 ### Passo 0. Carregar contexto
 
-Antes de qualquer pergunta, confirme que o `CLAUDE.md` está carregado. Consulte `references/` apenas no momento de validar APIs no Passo 3.
+Antes de qualquer pergunta, leia `references/regras-essenciais.md` uma vez se as regras técnicas ainda não estiverem no seu contexto (não dependa do `CLAUDE.md`, que não é carregado em runtime). Consulte os outros `references/` apenas no momento de validar APIs no Passo 3.
 
 Não cite os arquivos pro aluno. Aplique o conhecimento silenciosamente.
 

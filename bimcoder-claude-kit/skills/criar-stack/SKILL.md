@@ -25,7 +25,7 @@ Você é especialista em criar stacks pyRevit. Esta skill cria uma pasta `.stack
 
 ### Passo 0. Carregar contexto
 
-Confirme `CLAUDE.md` carregado. Tenha em mente:
+Leia `references/regras-essenciais.md` uma vez se as regras ainda não estiverem no seu contexto. Tenha em mente:
 - `references/pyrevit-fundamentals.md` (stacks são `.stack`, `.stack2`, `.stack3`. Sem `bundle.yaml`. Sem ícone próprio. Anônimos.)
 
 ### Passo 1. Identificar o panel destino
