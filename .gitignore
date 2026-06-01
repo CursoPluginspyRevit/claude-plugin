@@ -1,2 +1,6 @@
 # Arquivos internos. Nao vao pro repo publico.
 secao-skills.html
+
+# Builds do instalador. Binarios nao vao pro repo (so o fonte .iss/.ps1).
+installer/output/
+*.exe
